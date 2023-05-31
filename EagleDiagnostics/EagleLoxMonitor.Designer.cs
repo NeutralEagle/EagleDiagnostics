@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 
 namespace EagleDiagnostics
@@ -111,8 +112,9 @@ namespace EagleDiagnostics
             // 
             // openFileDialog1
             // 
-            openFileDialog1.FileName = "openFileDialog1";
-            openFileDialog1.Filter = "Loxone Monitor|*.LxMon";
+            openFileDialog1.FileName = "";
+            openFileDialog1.Filter = "Loxone Monitor or Txt|*.LxMon;*.txt|Loxone Monitor|*.LxMon|Text File|*.txt";
+            
             // 
             // receiveButton
             // 
@@ -198,7 +200,9 @@ namespace EagleDiagnostics
             KeyDown += Form1_KeyDown;
             ResumeLayout(false);
             PerformLayout();
+            this.FormClosing += EagleLoxMonitor_FormClosing;
         }
+        
 
 
 

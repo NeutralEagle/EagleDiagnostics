@@ -3,6 +3,7 @@ using System.Text;
 using System.Net;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 
 
 namespace EagleDiagnostics
@@ -24,6 +25,7 @@ namespace EagleDiagnostics
         int ppsTotal = 0;
         private readonly string regexPattern = @"\0\u001f.*?\0\0\u0001";
         Thread UDPthread;
+        UdpClient? udpClient = null;
         public EagleLoxMonitor()
         {
             //Lines = GetLines();
@@ -57,7 +59,7 @@ namespace EagleDiagnostics
 
         public void UDP_setup()
         {
-            UdpClient? udpClient = null;
+            
             try
             {
                 udpClient = new UdpClient(Port);
@@ -71,20 +73,22 @@ namespace EagleDiagnostics
             }
             IPEndPoint iPEndPoint = new(IPAddress.Any, Port);
 
-            while (true)
+            while (!formClosing)
             {
-                if (!loadFlag) FillData(udpClient.Receive(ref iPEndPoint), false);
-                if (formClosing) { break; }
-
+                try { 
+                if (!loadFlag) FillData(udpClient.Receive(ref iPEndPoint), true);
+                }
+                catch { }
 
             }
-
+            
 
 
         }
 
         public void FillData(byte[] data, bool arr)
         {
+            if (arr) { 
             int indexOfNull;
 
             if (data[2] == '\xa0') return;//NYI - unknown message
@@ -120,27 +124,34 @@ namespace EagleDiagnostics
                         }
                         string bytes0_8 = sb.ToString();*/
                         int messageNr = BitConverter.ToUInt16(data, 6);
-                        /*
-                        sb.Clear();
-                        foreach (var b in data.Skip(17).Take(6).ToArray())
-                        {
-                            sb.Append(b.ToString().PadLeft(3, '0') + ", ");
+                            /*
+                            sb.Clear();
+                            foreach (var b in data.Skip(17).Take(6).ToArray())
+                            {
+                                sb.Append(b.ToString().PadLeft(3, '0') + ", ");
 
-                        }
-                        string bytes18_23 = sb.ToString();
-                        */
+                            }
+                            string bytes18_23 = sb.ToString();
+                            */
 
-                        //Invoke((MethodInvoker)(() => mainListBox.Items.Add($"{bytes0_8}{messageNr.ToString().PadLeft(5, '0')}   {LoxTimeStampToDateTime(time)}.{millisec.ToString().PadLeft(3, '0')};    {IP}    {bytes18_23}        {header} {str}")));
+                            //Invoke((MethodInvoker)(() => mainListBox.Items.Add($"{bytes0_8}{messageNr.ToString().PadLeft(5, '0')}   {LoxTimeStampToDateTime(time)}.{millisec.ToString().PadLeft(3, '0')};    {IP}    {bytes18_23}        {header} {str}")));
+                            if (formClosing) 
+                                return;
                         Invoke((MethodInvoker)(() => mainListBox.Items.Add($"{messageNr,5}  {LoxTimeStampToDateTime(time)}.{millisec.ToString().PadLeft(3, '0')};  {IP,-16}{header}{str}")));
 
                         if (refreshFlag == true) Invoke((MethodInvoker)(() => mainListBox.TopIndex = mainListBox.Items.Count - 1));
 
                     }
-
-
-
-
                 }
+            
+
+
+            }
+            else
+            {
+                var stringFile = Encoding.UTF8.GetString(data).Split("\r\n");
+                foreach (var line in stringFile) { Invoke((MethodInvoker)(() => mainListBox.Items.Add(line))); }
+            }
         }
         private static DateTime LoxTimeStampToDateTime(double unixTimeStamp)
         {
@@ -175,7 +186,7 @@ namespace EagleDiagnostics
             {
                 foreach (var item in mainListBox.Items)
                 {
-                    mainListBox.SelectedItems.Add(item);
+                    Invoke((MethodInvoker)(() => mainListBox.SelectedItems.Add(item)));
                 }
             }
         }
@@ -201,15 +212,19 @@ namespace EagleDiagnostics
 
         private void LoadButton_Click(object sender, EventArgs e)
         {
-            mainListBox.Items.Clear();
+            Invoke((MethodInvoker)(() => mainListBox.Items.Clear()));
             loadFlag = true;
             receiveButton.Enabled = true;
-            openFileDialog1.ShowDialog();
+            
+            var a = openFileDialog1.ShowDialog();
+            if (a == DialogResult.OK) 
             try
             {
                 monitorFile = File.ReadAllBytes(openFileDialog1.FileName);
             }
             catch (Exception ex) { MessageBox.Show(ex.Message); }
+            if(monitorFile == null) return;
+            if (monitorFile.Length < 30) return;
             if (monitorFile[1] < 30)
             {
                 /*
@@ -258,13 +273,13 @@ namespace EagleDiagnostics
             }
             else 
             {
-                FillDataTxt(monitorFile);
+                FillData(monitorFile,false);
             }
         }
 
         private void ReceiveButton_Click(object sender, EventArgs e)
         {
-            mainListBox.Items.Clear(); 
+            Invoke((MethodInvoker)(() => mainListBox.Items.Clear())); 
             loadFlag = false;
             receiveButton.Enabled = false;
             Thread UDPthread = new(UDP_setup);
@@ -283,12 +298,11 @@ namespace EagleDiagnostics
             totalPacketLabel.Text = pps.ToString();
 
         }
-
-        private void FillDataTxt(byte[] monitorFile)
-        { 
-        throw new NotImplementedException();
+        void EagleLoxMonitor_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            udpClient.Close();
+            udpClient.Dispose();
+            formClosing = true;
         }
-
     }
-
 }
