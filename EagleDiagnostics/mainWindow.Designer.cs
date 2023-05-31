@@ -29,346 +29,338 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
-            this.comboConfigLanguage = new System.Windows.Forms.ComboBox();
-            this.comboConfigVersion = new System.Windows.Forms.ComboBox();
-            this.buttonConfigLaunch = new System.Windows.Forms.Button();
-            this.buttonConfigRescan = new System.Windows.Forms.Button();
-            this.buttonStartApp = new System.Windows.Forms.Button();
-            this.checkBoxAppDebug = new System.Windows.Forms.CheckBox();
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.languageSelectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.catalanToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.chineseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.czechToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.germanToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.englishToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.englishUSToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.spanishToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.frenchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.italianToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.hungarianToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.dutchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.norwegianToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.polishToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.romanianToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.russianToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.slovakianToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.turkishToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.buttonUpdateCheck = new System.Windows.Forms.Button();
-            this.labelLastVersion = new System.Windows.Forms.Label();
-            this.comboReleaseType = new System.Windows.Forms.ComboBox();
-            this.menuStrip1.SuspendLayout();
-            this.SuspendLayout();
+            comboConfigLanguage = new ComboBox();
+            comboConfigVersion = new ComboBox();
+            buttonConfigLaunch = new Button();
+            buttonConfigRescan = new Button();
+            buttonStartApp = new Button();
+            checkBoxAppDebug = new CheckBox();
+            menuStrip1 = new MenuStrip();
+            settingsToolStripMenuItem = new ToolStripMenuItem();
+            languageSelectToolStripMenuItem = new ToolStripMenuItem();
+            catalanToolStripMenuItem = new ToolStripMenuItem();
+            chineseToolStripMenuItem = new ToolStripMenuItem();
+            czechToolStripMenuItem = new ToolStripMenuItem();
+            germanToolStripMenuItem = new ToolStripMenuItem();
+            englishToolStripMenuItem = new ToolStripMenuItem();
+            englishUSToolStripMenuItem = new ToolStripMenuItem();
+            spanishToolStripMenuItem = new ToolStripMenuItem();
+            frenchToolStripMenuItem = new ToolStripMenuItem();
+            italianToolStripMenuItem = new ToolStripMenuItem();
+            hungarianToolStripMenuItem = new ToolStripMenuItem();
+            dutchToolStripMenuItem = new ToolStripMenuItem();
+            norwegianToolStripMenuItem = new ToolStripMenuItem();
+            polishToolStripMenuItem = new ToolStripMenuItem();
+            romanianToolStripMenuItem = new ToolStripMenuItem();
+            russianToolStripMenuItem = new ToolStripMenuItem();
+            slovakianToolStripMenuItem = new ToolStripMenuItem();
+            turkishToolStripMenuItem = new ToolStripMenuItem();
+            buttonUpdateCheck = new Button();
+            labelLastVersion = new Label();
+            comboReleaseType = new ComboBox();
+            toolsToolStripMenuItem = new ToolStripMenuItem();
+            eagleLoxMonitorToolStripMenuItem = new ToolStripMenuItem();
+            menuStrip1.SuspendLayout();
+            SuspendLayout();
             // 
             // comboConfigLanguage
             // 
-            this.comboConfigLanguage.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboConfigLanguage.FormattingEnabled = true;
-            this.comboConfigLanguage.Location = new System.Drawing.Point(611, 405);
-            this.comboConfigLanguage.Name = "comboConfigLanguage";
-            this.comboConfigLanguage.Size = new System.Drawing.Size(88, 23);
-            this.comboConfigLanguage.TabIndex = 0;
+            comboConfigLanguage.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboConfigLanguage.FormattingEnabled = true;
+            comboConfigLanguage.Location = new Point(611, 405);
+            comboConfigLanguage.Name = "comboConfigLanguage";
+            comboConfigLanguage.Size = new Size(88, 23);
+            comboConfigLanguage.TabIndex = 0;
             // 
             // comboConfigVersion
             // 
-            this.comboConfigVersion.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboConfigVersion.FormattingEnabled = true;
-            this.comboConfigVersion.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.comboConfigVersion.Location = new System.Drawing.Point(355, 405);
-            this.comboConfigVersion.Name = "comboConfigVersion";
-            this.comboConfigVersion.Size = new System.Drawing.Size(250, 23);
-            this.comboConfigVersion.TabIndex = 1;
+            comboConfigVersion.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboConfigVersion.FormattingEnabled = true;
+            comboConfigVersion.ImeMode = ImeMode.NoControl;
+            comboConfigVersion.Location = new Point(355, 405);
+            comboConfigVersion.Name = "comboConfigVersion";
+            comboConfigVersion.Size = new Size(250, 23);
+            comboConfigVersion.TabIndex = 1;
             // 
             // buttonConfigLaunch
             // 
-            this.buttonConfigLaunch.Location = new System.Drawing.Point(705, 405);
-            this.buttonConfigLaunch.Name = "buttonConfigLaunch";
-            this.buttonConfigLaunch.Size = new System.Drawing.Size(87, 23);
-            this.buttonConfigLaunch.TabIndex = 2;
-            this.buttonConfigLaunch.Text = "Start";
-            this.buttonConfigLaunch.UseVisualStyleBackColor = true;
-            this.buttonConfigLaunch.Click += new System.EventHandler(this.ButtonConfigLaunch_Click);
+            buttonConfigLaunch.Location = new Point(705, 405);
+            buttonConfigLaunch.Name = "buttonConfigLaunch";
+            buttonConfigLaunch.Size = new Size(87, 23);
+            buttonConfigLaunch.TabIndex = 2;
+            buttonConfigLaunch.Text = "Start";
+            buttonConfigLaunch.UseVisualStyleBackColor = true;
+            buttonConfigLaunch.Click += ButtonConfigLaunch_Click;
             // 
             // buttonConfigRescan
             // 
-            this.buttonConfigRescan.Location = new System.Drawing.Point(274, 405);
-            this.buttonConfigRescan.Name = "buttonConfigRescan";
-            this.buttonConfigRescan.Size = new System.Drawing.Size(75, 23);
-            this.buttonConfigRescan.TabIndex = 3;
-            this.buttonConfigRescan.Text = "Rescan";
-            this.buttonConfigRescan.UseVisualStyleBackColor = true;
-            this.buttonConfigRescan.Click += new System.EventHandler(this.ButtonConfigRescan_Click);
+            buttonConfigRescan.Location = new Point(274, 405);
+            buttonConfigRescan.Name = "buttonConfigRescan";
+            buttonConfigRescan.Size = new Size(75, 23);
+            buttonConfigRescan.TabIndex = 3;
+            buttonConfigRescan.Text = "Rescan";
+            buttonConfigRescan.UseVisualStyleBackColor = true;
+            buttonConfigRescan.Click += ButtonConfigRescan_Click;
             // 
             // buttonStartApp
             // 
-            this.buttonStartApp.Location = new System.Drawing.Point(12, 406);
-            this.buttonStartApp.Name = "buttonStartApp";
-            this.buttonStartApp.Size = new System.Drawing.Size(75, 23);
-            this.buttonStartApp.TabIndex = 4;
-            this.buttonStartApp.Text = "Start App";
-            this.buttonStartApp.UseVisualStyleBackColor = true;
-            this.buttonStartApp.Click += new System.EventHandler(this.ButtonStartApp_Click);
+            buttonStartApp.Location = new Point(12, 406);
+            buttonStartApp.Name = "buttonStartApp";
+            buttonStartApp.Size = new Size(75, 23);
+            buttonStartApp.TabIndex = 4;
+            buttonStartApp.Text = "Start App";
+            buttonStartApp.UseVisualStyleBackColor = true;
+            buttonStartApp.Click += ButtonStartApp_Click;
             // 
             // checkBoxAppDebug
             // 
-            this.checkBoxAppDebug.AutoSize = true;
-            this.checkBoxAppDebug.BackColor = System.Drawing.Color.Transparent;
-            this.checkBoxAppDebug.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.checkBoxAppDebug.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.checkBoxAppDebug.Location = new System.Drawing.Point(93, 409);
-            this.checkBoxAppDebug.Name = "checkBoxAppDebug";
-            this.checkBoxAppDebug.Size = new System.Drawing.Size(68, 19);
-            this.checkBoxAppDebug.TabIndex = 5;
-            this.checkBoxAppDebug.Text = "Debug?";
-            this.checkBoxAppDebug.UseVisualStyleBackColor = false;
+            checkBoxAppDebug.AutoSize = true;
+            checkBoxAppDebug.BackColor = Color.Transparent;
+            checkBoxAppDebug.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            checkBoxAppDebug.ForeColor = SystemColors.ButtonFace;
+            checkBoxAppDebug.Location = new Point(93, 409);
+            checkBoxAppDebug.Name = "checkBoxAppDebug";
+            checkBoxAppDebug.Size = new Size(68, 19);
+            checkBoxAppDebug.TabIndex = 5;
+            checkBoxAppDebug.Text = "Debug?";
+            checkBoxAppDebug.UseVisualStyleBackColor = false;
             // 
             // menuStrip1
             // 
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.settingsToolStripMenuItem});
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(804, 24);
-            this.menuStrip1.TabIndex = 6;
-            this.menuStrip1.Text = "menuStrip1";
+            menuStrip1.Items.AddRange(new ToolStripItem[] { settingsToolStripMenuItem, toolsToolStripMenuItem });
+            menuStrip1.Location = new Point(0, 0);
+            menuStrip1.Name = "menuStrip1";
+            menuStrip1.Size = new Size(804, 24);
+            menuStrip1.TabIndex = 6;
+            menuStrip1.Text = "menuStrip1";
             // 
             // settingsToolStripMenuItem
             // 
-            this.settingsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.languageSelectToolStripMenuItem});
-            this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
-            this.settingsToolStripMenuItem.Text = "Settings";
+            settingsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { languageSelectToolStripMenuItem });
+            settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
+            settingsToolStripMenuItem.Size = new Size(61, 20);
+            settingsToolStripMenuItem.Text = "Settings";
             // 
             // languageSelectToolStripMenuItem
             // 
-            this.languageSelectToolStripMenuItem.CheckOnClick = true;
-            this.languageSelectToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.catalanToolStripMenuItem,
-            this.chineseToolStripMenuItem,
-            this.czechToolStripMenuItem,
-            this.germanToolStripMenuItem,
-            this.englishToolStripMenuItem,
-            this.englishUSToolStripMenuItem,
-            this.spanishToolStripMenuItem,
-            this.frenchToolStripMenuItem,
-            this.italianToolStripMenuItem,
-            this.hungarianToolStripMenuItem,
-            this.dutchToolStripMenuItem,
-            this.norwegianToolStripMenuItem,
-            this.polishToolStripMenuItem,
-            this.romanianToolStripMenuItem,
-            this.russianToolStripMenuItem,
-            this.slovakianToolStripMenuItem,
-            this.turkishToolStripMenuItem});
-            this.languageSelectToolStripMenuItem.Name = "languageSelectToolStripMenuItem";
-            this.languageSelectToolStripMenuItem.Size = new System.Drawing.Size(159, 22);
-            this.languageSelectToolStripMenuItem.Text = "Language select";
-            this.languageSelectToolStripMenuItem.Click += new System.EventHandler(this.LanguageSelectToolStripMenuItem_Click);
+            languageSelectToolStripMenuItem.CheckOnClick = true;
+            languageSelectToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { catalanToolStripMenuItem, chineseToolStripMenuItem, czechToolStripMenuItem, germanToolStripMenuItem, englishToolStripMenuItem, englishUSToolStripMenuItem, spanishToolStripMenuItem, frenchToolStripMenuItem, italianToolStripMenuItem, hungarianToolStripMenuItem, dutchToolStripMenuItem, norwegianToolStripMenuItem, polishToolStripMenuItem, romanianToolStripMenuItem, russianToolStripMenuItem, slovakianToolStripMenuItem, turkishToolStripMenuItem });
+            languageSelectToolStripMenuItem.Name = "languageSelectToolStripMenuItem";
+            languageSelectToolStripMenuItem.Size = new Size(159, 22);
+            languageSelectToolStripMenuItem.Text = "Language select";
+            languageSelectToolStripMenuItem.Click += LanguageSelectToolStripMenuItem_Click;
             // 
             // catalanToolStripMenuItem
             // 
-            this.catalanToolStripMenuItem.CheckOnClick = true;
-            this.catalanToolStripMenuItem.Name = "catalanToolStripMenuItem";
-            this.catalanToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
-            this.catalanToolStripMenuItem.Text = "CAT - Catalan";
-            this.catalanToolStripMenuItem.Click += new System.EventHandler(this.CatalanToolStripMenuItem_Click);
+            catalanToolStripMenuItem.CheckOnClick = true;
+            catalanToolStripMenuItem.Name = "catalanToolStripMenuItem";
+            catalanToolStripMenuItem.Size = new Size(172, 22);
+            catalanToolStripMenuItem.Text = "CAT - Catalan";
+            catalanToolStripMenuItem.Click += CatalanToolStripMenuItem_Click;
             // 
             // chineseToolStripMenuItem
             // 
-            this.chineseToolStripMenuItem.CheckOnClick = true;
-            this.chineseToolStripMenuItem.Name = "chineseToolStripMenuItem";
-            this.chineseToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
-            this.chineseToolStripMenuItem.Text = "CHS - Chinese";
-            this.chineseToolStripMenuItem.Click += new System.EventHandler(this.ChineseToolStripMenuItem_Click);
+            chineseToolStripMenuItem.CheckOnClick = true;
+            chineseToolStripMenuItem.Name = "chineseToolStripMenuItem";
+            chineseToolStripMenuItem.Size = new Size(172, 22);
+            chineseToolStripMenuItem.Text = "CHS - Chinese";
+            chineseToolStripMenuItem.Click += ChineseToolStripMenuItem_Click;
             // 
             // czechToolStripMenuItem
             // 
-            this.czechToolStripMenuItem.CheckOnClick = true;
-            this.czechToolStripMenuItem.Name = "czechToolStripMenuItem";
-            this.czechToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
-            this.czechToolStripMenuItem.Text = "CSY - Czech";
-            this.czechToolStripMenuItem.Click += new System.EventHandler(this.CzechToolStripMenuItem_Click);
+            czechToolStripMenuItem.CheckOnClick = true;
+            czechToolStripMenuItem.Name = "czechToolStripMenuItem";
+            czechToolStripMenuItem.Size = new Size(172, 22);
+            czechToolStripMenuItem.Text = "CSY - Czech";
+            czechToolStripMenuItem.Click += CzechToolStripMenuItem_Click;
             // 
             // germanToolStripMenuItem
             // 
-            this.germanToolStripMenuItem.CheckOnClick = true;
-            this.germanToolStripMenuItem.Name = "germanToolStripMenuItem";
-            this.germanToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
-            this.germanToolStripMenuItem.Text = "DEU - German";
-            this.germanToolStripMenuItem.Click += new System.EventHandler(this.GermanToolStripMenuItem_Click);
+            germanToolStripMenuItem.CheckOnClick = true;
+            germanToolStripMenuItem.Name = "germanToolStripMenuItem";
+            germanToolStripMenuItem.Size = new Size(172, 22);
+            germanToolStripMenuItem.Text = "DEU - German";
+            germanToolStripMenuItem.Click += GermanToolStripMenuItem_Click;
             // 
             // englishToolStripMenuItem
             // 
-            this.englishToolStripMenuItem.CheckOnClick = true;
-            this.englishToolStripMenuItem.Name = "englishToolStripMenuItem";
-            this.englishToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
-            this.englishToolStripMenuItem.Text = "ENG - English (UK)";
-            this.englishToolStripMenuItem.Click += new System.EventHandler(this.EnglishToolStripMenuItem_Click);
+            englishToolStripMenuItem.CheckOnClick = true;
+            englishToolStripMenuItem.Name = "englishToolStripMenuItem";
+            englishToolStripMenuItem.Size = new Size(172, 22);
+            englishToolStripMenuItem.Text = "ENG - English (UK)";
+            englishToolStripMenuItem.Click += EnglishToolStripMenuItem_Click;
             // 
             // englishUSToolStripMenuItem
             // 
-            this.englishUSToolStripMenuItem.CheckOnClick = true;
-            this.englishUSToolStripMenuItem.Name = "englishUSToolStripMenuItem";
-            this.englishUSToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
-            this.englishUSToolStripMenuItem.Text = "ENU - English (US)";
-            this.englishUSToolStripMenuItem.Click += new System.EventHandler(this.EnglishUSToolStripMenuItem_Click);
+            englishUSToolStripMenuItem.CheckOnClick = true;
+            englishUSToolStripMenuItem.Name = "englishUSToolStripMenuItem";
+            englishUSToolStripMenuItem.Size = new Size(172, 22);
+            englishUSToolStripMenuItem.Text = "ENU - English (US)";
+            englishUSToolStripMenuItem.Click += EnglishUSToolStripMenuItem_Click;
             // 
             // spanishToolStripMenuItem
             // 
-            this.spanishToolStripMenuItem.CheckOnClick = true;
-            this.spanishToolStripMenuItem.Name = "spanishToolStripMenuItem";
-            this.spanishToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
-            this.spanishToolStripMenuItem.Text = "ESN - Spanish";
-            this.spanishToolStripMenuItem.Click += new System.EventHandler(this.SpanishToolStripMenuItem_Click);
+            spanishToolStripMenuItem.CheckOnClick = true;
+            spanishToolStripMenuItem.Name = "spanishToolStripMenuItem";
+            spanishToolStripMenuItem.Size = new Size(172, 22);
+            spanishToolStripMenuItem.Text = "ESN - Spanish";
+            spanishToolStripMenuItem.Click += SpanishToolStripMenuItem_Click;
             // 
             // frenchToolStripMenuItem
             // 
-            this.frenchToolStripMenuItem.CheckOnClick = true;
-            this.frenchToolStripMenuItem.Name = "frenchToolStripMenuItem";
-            this.frenchToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
-            this.frenchToolStripMenuItem.Text = "FRA - French";
-            this.frenchToolStripMenuItem.Click += new System.EventHandler(this.FrenchToolStripMenuItem_Click);
+            frenchToolStripMenuItem.CheckOnClick = true;
+            frenchToolStripMenuItem.Name = "frenchToolStripMenuItem";
+            frenchToolStripMenuItem.Size = new Size(172, 22);
+            frenchToolStripMenuItem.Text = "FRA - French";
+            frenchToolStripMenuItem.Click += FrenchToolStripMenuItem_Click;
             // 
             // italianToolStripMenuItem
             // 
-            this.italianToolStripMenuItem.CheckOnClick = true;
-            this.italianToolStripMenuItem.Name = "italianToolStripMenuItem";
-            this.italianToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
-            this.italianToolStripMenuItem.Text = "ITA - Italian";
-            this.italianToolStripMenuItem.Click += new System.EventHandler(this.ItalianToolStripMenuItem_Click);
+            italianToolStripMenuItem.CheckOnClick = true;
+            italianToolStripMenuItem.Name = "italianToolStripMenuItem";
+            italianToolStripMenuItem.Size = new Size(172, 22);
+            italianToolStripMenuItem.Text = "ITA - Italian";
+            italianToolStripMenuItem.Click += ItalianToolStripMenuItem_Click;
             // 
             // hungarianToolStripMenuItem
             // 
-            this.hungarianToolStripMenuItem.CheckOnClick = true;
-            this.hungarianToolStripMenuItem.Name = "hungarianToolStripMenuItem";
-            this.hungarianToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
-            this.hungarianToolStripMenuItem.Text = "HUN - Hungarian";
-            this.hungarianToolStripMenuItem.Click += new System.EventHandler(this.HungarianToolStripMenuItem_Click);
+            hungarianToolStripMenuItem.CheckOnClick = true;
+            hungarianToolStripMenuItem.Name = "hungarianToolStripMenuItem";
+            hungarianToolStripMenuItem.Size = new Size(172, 22);
+            hungarianToolStripMenuItem.Text = "HUN - Hungarian";
+            hungarianToolStripMenuItem.Click += HungarianToolStripMenuItem_Click;
             // 
             // dutchToolStripMenuItem
             // 
-            this.dutchToolStripMenuItem.CheckOnClick = true;
-            this.dutchToolStripMenuItem.Name = "dutchToolStripMenuItem";
-            this.dutchToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
-            this.dutchToolStripMenuItem.Text = "NLD - Dutch";
-            this.dutchToolStripMenuItem.Click += new System.EventHandler(this.DutchToolStripMenuItem_Click);
+            dutchToolStripMenuItem.CheckOnClick = true;
+            dutchToolStripMenuItem.Name = "dutchToolStripMenuItem";
+            dutchToolStripMenuItem.Size = new Size(172, 22);
+            dutchToolStripMenuItem.Text = "NLD - Dutch";
+            dutchToolStripMenuItem.Click += DutchToolStripMenuItem_Click;
             // 
             // norwegianToolStripMenuItem
             // 
-            this.norwegianToolStripMenuItem.CheckOnClick = true;
-            this.norwegianToolStripMenuItem.Name = "norwegianToolStripMenuItem";
-            this.norwegianToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
-            this.norwegianToolStripMenuItem.Text = "NOR - Norwegian";
-            this.norwegianToolStripMenuItem.Click += new System.EventHandler(this.NorwegianToolStripMenuItem_Click);
+            norwegianToolStripMenuItem.CheckOnClick = true;
+            norwegianToolStripMenuItem.Name = "norwegianToolStripMenuItem";
+            norwegianToolStripMenuItem.Size = new Size(172, 22);
+            norwegianToolStripMenuItem.Text = "NOR - Norwegian";
+            norwegianToolStripMenuItem.Click += NorwegianToolStripMenuItem_Click;
             // 
             // polishToolStripMenuItem
             // 
-            this.polishToolStripMenuItem.CheckOnClick = true;
-            this.polishToolStripMenuItem.Name = "polishToolStripMenuItem";
-            this.polishToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
-            this.polishToolStripMenuItem.Text = "PLK - Polish";
-            this.polishToolStripMenuItem.Click += new System.EventHandler(this.PolishToolStripMenuItem_Click);
+            polishToolStripMenuItem.CheckOnClick = true;
+            polishToolStripMenuItem.Name = "polishToolStripMenuItem";
+            polishToolStripMenuItem.Size = new Size(172, 22);
+            polishToolStripMenuItem.Text = "PLK - Polish";
+            polishToolStripMenuItem.Click += PolishToolStripMenuItem_Click;
             // 
             // romanianToolStripMenuItem
             // 
-            this.romanianToolStripMenuItem.CheckOnClick = true;
-            this.romanianToolStripMenuItem.Name = "romanianToolStripMenuItem";
-            this.romanianToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
-            this.romanianToolStripMenuItem.Text = "ROM - Romanian";
-            this.romanianToolStripMenuItem.Click += new System.EventHandler(this.RomanianToolStripMenuItem_Click);
+            romanianToolStripMenuItem.CheckOnClick = true;
+            romanianToolStripMenuItem.Name = "romanianToolStripMenuItem";
+            romanianToolStripMenuItem.Size = new Size(172, 22);
+            romanianToolStripMenuItem.Text = "ROM - Romanian";
+            romanianToolStripMenuItem.Click += RomanianToolStripMenuItem_Click;
             // 
             // russianToolStripMenuItem
             // 
-            this.russianToolStripMenuItem.CheckOnClick = true;
-            this.russianToolStripMenuItem.Name = "russianToolStripMenuItem";
-            this.russianToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
-            this.russianToolStripMenuItem.Text = "RUS - Russian";
-            this.russianToolStripMenuItem.Click += new System.EventHandler(this.RussianToolStripMenuItem_Click);
+            russianToolStripMenuItem.CheckOnClick = true;
+            russianToolStripMenuItem.Name = "russianToolStripMenuItem";
+            russianToolStripMenuItem.Size = new Size(172, 22);
+            russianToolStripMenuItem.Text = "RUS - Russian";
+            russianToolStripMenuItem.Click += RussianToolStripMenuItem_Click;
             // 
             // slovakianToolStripMenuItem
             // 
-            this.slovakianToolStripMenuItem.CheckOnClick = true;
-            this.slovakianToolStripMenuItem.Name = "slovakianToolStripMenuItem";
-            this.slovakianToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
-            this.slovakianToolStripMenuItem.Text = "SKY - Slovakian";
-            this.slovakianToolStripMenuItem.Click += new System.EventHandler(this.SlovakianToolStripMenuItem_Click);
+            slovakianToolStripMenuItem.CheckOnClick = true;
+            slovakianToolStripMenuItem.Name = "slovakianToolStripMenuItem";
+            slovakianToolStripMenuItem.Size = new Size(172, 22);
+            slovakianToolStripMenuItem.Text = "SKY - Slovakian";
+            slovakianToolStripMenuItem.Click += SlovakianToolStripMenuItem_Click;
             // 
             // turkishToolStripMenuItem
             // 
-            this.turkishToolStripMenuItem.CheckOnClick = true;
-            this.turkishToolStripMenuItem.Name = "turkishToolStripMenuItem";
-            this.turkishToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
-            this.turkishToolStripMenuItem.Text = "TRK - Turkish";
-            this.turkishToolStripMenuItem.Click += new System.EventHandler(this.TurkishToolStripMenuItem_Click);
+            turkishToolStripMenuItem.CheckOnClick = true;
+            turkishToolStripMenuItem.Name = "turkishToolStripMenuItem";
+            turkishToolStripMenuItem.Size = new Size(172, 22);
+            turkishToolStripMenuItem.Text = "TRK - Turkish";
+            turkishToolStripMenuItem.Click += TurkishToolStripMenuItem_Click;
             // 
             // buttonUpdateCheck
             // 
-            this.buttonUpdateCheck.Location = new System.Drawing.Point(705, 375);
-            this.buttonUpdateCheck.Name = "buttonUpdateCheck";
-            this.buttonUpdateCheck.Size = new System.Drawing.Size(87, 23);
-            this.buttonUpdateCheck.TabIndex = 7;
-            this.buttonUpdateCheck.Text = "UpdateCheck";
-            this.buttonUpdateCheck.UseVisualStyleBackColor = true;
-            this.buttonUpdateCheck.Click += new System.EventHandler(this.ButtonUpdateCheck_Click);
+            buttonUpdateCheck.Location = new Point(705, 375);
+            buttonUpdateCheck.Name = "buttonUpdateCheck";
+            buttonUpdateCheck.Size = new Size(87, 23);
+            buttonUpdateCheck.TabIndex = 7;
+            buttonUpdateCheck.Text = "UpdateCheck";
+            buttonUpdateCheck.UseVisualStyleBackColor = true;
+            buttonUpdateCheck.Click += ButtonUpdateCheck_Click;
             // 
             // labelLastVersion
             // 
-            this.labelLastVersion.AutoSize = true;
-            this.labelLastVersion.BackColor = System.Drawing.Color.Black;
-            this.labelLastVersion.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.labelLastVersion.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.labelLastVersion.Location = new System.Drawing.Point(611, 357);
-            this.labelLastVersion.Name = "labelLastVersion";
-            this.labelLastVersion.Size = new System.Drawing.Size(181, 15);
-            this.labelLastVersion.TabIndex = 8;
-            this.labelLastVersion.Text = "UpdateCheck to scan last version";
+            labelLastVersion.AutoSize = true;
+            labelLastVersion.BackColor = Color.Black;
+            labelLastVersion.FlatStyle = FlatStyle.Flat;
+            labelLastVersion.ForeColor = SystemColors.ButtonHighlight;
+            labelLastVersion.Location = new Point(611, 357);
+            labelLastVersion.Name = "labelLastVersion";
+            labelLastVersion.Size = new Size(181, 15);
+            labelLastVersion.TabIndex = 8;
+            labelLastVersion.Text = "UpdateCheck to scan last version";
             // 
             // comboReleaseType
             // 
-            this.comboReleaseType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboReleaseType.FormattingEnabled = true;
-            this.comboReleaseType.Items.AddRange(new object[] {
-            "Test",
-            "Beta",
-            "Release"});
-            this.comboReleaseType.Location = new System.Drawing.Point(611, 376);
-            this.comboReleaseType.MaxDropDownItems = 3;
-            this.comboReleaseType.Name = "comboReleaseType";
-            this.comboReleaseType.Size = new System.Drawing.Size(88, 23);
-            this.comboReleaseType.TabIndex = 9;
-            this.comboReleaseType.SelectedIndex = 2;
+            comboReleaseType.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboReleaseType.FormattingEnabled = true;
+            comboReleaseType.Items.AddRange(new object[] { "Test", "Beta", "Release" });
+            comboReleaseType.Location = new Point(611, 376);
+            comboReleaseType.MaxDropDownItems = 3;
+            comboReleaseType.Name = "comboReleaseType";
+            comboReleaseType.Size = new Size(88, 23);
+            comboReleaseType.TabIndex = 9;
+            // 
+            // toolsToolStripMenuItem
+            // 
+            toolsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { eagleLoxMonitorToolStripMenuItem });
+            toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
+            toolsToolStripMenuItem.Size = new Size(46, 20);
+            toolsToolStripMenuItem.Text = "Tools";
+            // 
+            // eagleLoxMonitorToolStripMenuItem
+            // 
+            eagleLoxMonitorToolStripMenuItem.Name = "eagleLoxMonitorToolStripMenuItem";
+            eagleLoxMonitorToolStripMenuItem.Size = new Size(180, 22);
+            eagleLoxMonitorToolStripMenuItem.Text = "EagleLoxMonitor";
+            eagleLoxMonitorToolStripMenuItem.Click += EagleLoxMonitorToolStripMenuItem_Click;
             // 
             // MainWindow
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackgroundImage = global::EagleDiagnostics.Properties.Resources.Background;
-            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
-            this.ClientSize = new System.Drawing.Size(804, 441);
-            this.Controls.Add(this.comboReleaseType);
-            this.Controls.Add(this.labelLastVersion);
-            this.Controls.Add(this.buttonUpdateCheck);
-            this.Controls.Add(this.checkBoxAppDebug);
-            this.Controls.Add(this.buttonStartApp);
-            this.Controls.Add(this.buttonConfigRescan);
-            this.Controls.Add(this.buttonConfigLaunch);
-            this.Controls.Add(this.comboConfigVersion);
-            this.Controls.Add(this.comboConfigLanguage);
-            this.Controls.Add(this.menuStrip1);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MainMenuStrip = this.menuStrip1;
-            this.MaximizeBox = false;
-            this.Name = "MainWindow";
-            this.Text = "EagleDiagnostics";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainWindow_FormClosing);
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            BackgroundImage = Properties.Resources.Background;
+            BackgroundImageLayout = ImageLayout.Center;
+            ClientSize = new Size(804, 441);
+            Controls.Add(comboReleaseType);
+            Controls.Add(labelLastVersion);
+            Controls.Add(buttonUpdateCheck);
+            Controls.Add(checkBoxAppDebug);
+            Controls.Add(buttonStartApp);
+            Controls.Add(buttonConfigRescan);
+            Controls.Add(buttonConfigLaunch);
+            Controls.Add(comboConfigVersion);
+            Controls.Add(comboConfigLanguage);
+            Controls.Add(menuStrip1);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
+            Icon = (Icon)resources.GetObject("$this.Icon");
+            MainMenuStrip = menuStrip1;
+            MaximizeBox = false;
+            Name = "MainWindow";
+            Text = "EagleDiagnostics";
+            FormClosing += MainWindow_FormClosing;
+            menuStrip1.ResumeLayout(false);
+            menuStrip1.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         private void languageSelectToolStripMenuItem_closed(object sender, EventArgs e)
@@ -409,5 +401,7 @@
         private Button buttonUpdateCheck;
         private Label labelLastVersion;
         private ComboBox comboReleaseType;
+        private ToolStripMenuItem toolsToolStripMenuItem;
+        private ToolStripMenuItem eagleLoxMonitorToolStripMenuItem;
     }
 }

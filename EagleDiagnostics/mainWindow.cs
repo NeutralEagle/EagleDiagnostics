@@ -34,12 +34,12 @@ namespace EagleDiagnostics
         public MainWindow()
         {
 
-            
+
             InitializeComponent();
             configDirectoryPath = FindConfig();
-            
+
             OnLoadChecks(languageList);
-            
+
 
 
 
@@ -86,7 +86,7 @@ namespace EagleDiagnostics
                     subdirlevel++;
                     HandleDirectory(path);
                 }
-                
+
                 if (subdirlevel > 0) subdirlevel--;
             }
             comboConfigVersion.SelectedIndex = comboConfigVersion.Items.Count - 1;
@@ -100,10 +100,10 @@ namespace EagleDiagnostics
                 Process.Start($"{configDirectoryPath}\\{comboConfigVersion.Text}\\LoxoneConfig.exe", $"/Language={comboConfigLanguage.Text}");
             }
             catch (Exception ex)
-            { 
-            MessageBox.Show(ex.Message);
+            {
+                MessageBox.Show(ex.Message);
             }
-            
+
         }
 
         private void ButtonStartApp_Click(object sender, EventArgs e)
@@ -126,27 +126,27 @@ namespace EagleDiagnostics
             }
             else
                 Directory.CreateDirectory($"{appData}\\EagleDiagnostics\\config.ini");
-            
-            
-            var MyIni = new IniFile($"{appData}\\EagleDiagnostics\\config.ini");
-            
 
-            if(catalanToolStripMenuItem.Checked)                MyIni.Write("CAT", "1", "LanguageList");
-            if (chineseToolStripMenuItem.Checked)                MyIni.Write("CHS", "1", "LanguageList");
-            if (czechToolStripMenuItem.Checked)                MyIni.Write("CSY", "1", "LanguageList");
-            if (englishToolStripMenuItem.Checked)                MyIni.Write("ENG", "1", "LanguageList");
-            if (englishUSToolStripMenuItem.Checked)                MyIni.Write("ENU", "1", "LanguageList");
-            if (spanishToolStripMenuItem.Checked)                MyIni.Write("ESN", "1", "LanguageList");
-            if (frenchToolStripMenuItem.Checked)                MyIni.Write("FRA", "1", "LanguageList");
-            if (italianToolStripMenuItem.Checked)                MyIni.Write("ITA", "1", "LanguageList");
-            if (hungarianToolStripMenuItem.Checked)                MyIni.Write("HUN", "1", "LanguageList");
-            if (dutchToolStripMenuItem.Checked)                MyIni.Write("NLD", "1", "LanguageList");
-            if (norwegianToolStripMenuItem.Checked)                MyIni.Write("NOR", "1", "LanguageList");
-            if (polishToolStripMenuItem.Checked)                MyIni.Write("PLK", "1", "LanguageList");
-            if (romanianToolStripMenuItem.Checked)                MyIni.Write("ROM", "1", "LanguageList");
-            if (russianToolStripMenuItem.Checked)                MyIni.Write("RUS", "1", "LanguageList");
-            if (russianToolStripMenuItem.Checked)                MyIni.Write("SKY", "1", "LanguageList");
-            if (turkishToolStripMenuItem.Checked)                MyIni.Write("TRK", "1", "LanguageList");
+
+            var MyIni = new IniFile($"{appData}\\EagleDiagnostics\\config.ini");
+
+
+            if (catalanToolStripMenuItem.Checked) MyIni.Write("CAT", "1", "LanguageList");
+            if (chineseToolStripMenuItem.Checked) MyIni.Write("CHS", "1", "LanguageList");
+            if (czechToolStripMenuItem.Checked) MyIni.Write("CSY", "1", "LanguageList");
+            if (englishToolStripMenuItem.Checked) MyIni.Write("ENG", "1", "LanguageList");
+            if (englishUSToolStripMenuItem.Checked) MyIni.Write("ENU", "1", "LanguageList");
+            if (spanishToolStripMenuItem.Checked) MyIni.Write("ESN", "1", "LanguageList");
+            if (frenchToolStripMenuItem.Checked) MyIni.Write("FRA", "1", "LanguageList");
+            if (italianToolStripMenuItem.Checked) MyIni.Write("ITA", "1", "LanguageList");
+            if (hungarianToolStripMenuItem.Checked) MyIni.Write("HUN", "1", "LanguageList");
+            if (dutchToolStripMenuItem.Checked) MyIni.Write("NLD", "1", "LanguageList");
+            if (norwegianToolStripMenuItem.Checked) MyIni.Write("NOR", "1", "LanguageList");
+            if (polishToolStripMenuItem.Checked) MyIni.Write("PLK", "1", "LanguageList");
+            if (romanianToolStripMenuItem.Checked) MyIni.Write("ROM", "1", "LanguageList");
+            if (russianToolStripMenuItem.Checked) MyIni.Write("RUS", "1", "LanguageList");
+            if (russianToolStripMenuItem.Checked) MyIni.Write("SKY", "1", "LanguageList");
+            if (turkishToolStripMenuItem.Checked) MyIni.Write("TRK", "1", "LanguageList");
 
 
 
@@ -160,8 +160,8 @@ namespace EagleDiagnostics
 
             else
                 MyIni.Write("DefaultLang", "ENG", "Misc");
-            if(comboConfigVersion.SelectedItem!=null)
-            MyIni.Write("DefaultVer", comboConfigVersion.SelectedItem.ToString(), "Misc");
+            if (comboConfigVersion.SelectedItem != null)
+                MyIni.Write("DefaultVer", comboConfigVersion.SelectedItem.ToString(), "Misc");
             if (checkBoxAppDebug.Checked)
                 MyIni.Write("DefaultDebugCheck", "1", "Misc");
             else
@@ -175,7 +175,7 @@ namespace EagleDiagnostics
         {
             var MyIni = new IniFile($"{appData}\\EagleDiagnostics\\config.ini");
             List<string> newList = new(languageList);
-            if (IniExists()) 
+            if (IniExists())
             {
                 foreach (var lang in languageList)
                     if (MyIni.KeyExists(lang, "LanguageList"))
@@ -194,7 +194,7 @@ namespace EagleDiagnostics
                         comboConfigVersion.Items.Add(entry);
                     }
                 }
-                if (MyIni.KeyExists("DefaultLang","Misc"))
+                if (MyIni.KeyExists("DefaultLang", "Misc"))
                     comboConfigLanguage.SelectedItem = MyIni.Read("DefaultLang", "Misc");
                 else
                     comboConfigLanguage.SelectedItem = comboConfigLanguage.Items.Count - 1;
@@ -216,7 +216,7 @@ namespace EagleDiagnostics
                 if (MyIni.Read("SKY", "LanguageList") == "1") slovakianToolStripMenuItem.Checked = true;
                 if (MyIni.Read("TRK", "LanguageList") == "1") turkishToolStripMenuItem.Checked = true;
 
-                if (MyIni.KeyExists("DefaultVer","Misc"))
+                if (MyIni.KeyExists("DefaultVer", "Misc"))
                     comboConfigVersion.SelectedItem = MyIni.Read("DefaultVer", "Misc");
                 else
                     comboConfigVersion.SelectedItem = comboConfigVersion.Items.Count - 1;
@@ -234,8 +234,8 @@ namespace EagleDiagnostics
                 else checkBoxAppDebug.Checked = false;
 
 
-                    
-                
+
+
             }
             else
             {
@@ -262,15 +262,15 @@ namespace EagleDiagnostics
             Directory.CreateDirectory($"{appData}\\EagleDiagnostics");
             var MyIni = new IniFile($"{appData}\\EagleDiagnostics\\config.ini");
             foreach (string lang in languagelist)
-                {
+            {
                 MyIni.Write(lang, "1", "LanguageList");
-                }
-                
-                foreach (string a in comboConfigVersion.Items)
-                {
-                    MyIni.Write(a, "1", "Versions");
-                }
-                
+            }
+
+            foreach (string a in comboConfigVersion.Items)
+            {
+                MyIni.Write(a, "1", "Versions");
+            }
+
         }
 
         private void FirstStart()
@@ -283,7 +283,7 @@ namespace EagleDiagnostics
         private string FindConfig()
         {
             string configPath = ExternalHelpers.RegistryRead("SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\LoxoneConfig_is1", "InstallLocation");
-            
+
             string[] configDirectoryPathArr = configPath.Split("\\");
             int i = 0;
 
@@ -308,12 +308,12 @@ namespace EagleDiagnostics
             try
             {
                 var versionInfo = FileVersionInfo.GetVersionInfo(filePath);
-                
+
                 string? version = versionInfo.FileVersion;
                 if (version is null)
                     return "N/A";
                 else
-                return version;
+                    return version;
             }
             catch
             {
@@ -351,7 +351,7 @@ namespace EagleDiagnostics
                 comboConfigLanguage.SelectedIndex = comboConfigLanguage.Items.IndexOf("CAT");
             }
             else if (!catalanToolStripMenuItem.Checked)
-            {  
+            {
                 comboConfigLanguage.Items.Remove("CAT");
                 comboConfigLanguage.SelectedIndex = comboConfigLanguage.Items.Count - 1;
             }
@@ -601,7 +601,7 @@ namespace EagleDiagnostics
                 }
                 configVersionList.Add(Convert.ToInt32(stringBuilder.ToString()));
             }
-            if(errorflag) MessageBox.Show("Missing one or more Loxone Config.exe from list. Please rescan and re-run UpdateCheck");
+            if (errorflag) MessageBox.Show("Missing one or more Loxone Config.exe from list. Please rescan and re-run UpdateCheck");
             int max = configVersionList.Max();
             labelLastVersion.Text = $"Last installed version: {max}";
             XmlNode xml = HttpGetXML("http://update.loxone.com/updatecheck.xml");
@@ -621,8 +621,8 @@ namespace EagleDiagnostics
                 {
                     attributes = attrNode.Attributes;
                 }
-                
-                
+
+
                 if (attributes is null)
                 {
                     MessageBox.Show("AttributeXML is null");
@@ -648,7 +648,7 @@ namespace EagleDiagnostics
                             downloadUrl = x.Value;
                         }
                     }
-                
+
                     if (ver > max)
                     {
                         DialogResult result = MessageBox.Show($"New {comboReleaseType.Text} version is available, press OK to download.", "New version!", MessageBoxButtons.OKCancel);
@@ -674,18 +674,24 @@ namespace EagleDiagnostics
             }
 
             return xmlDoc;
-            
+
         }
         private static async Task DownloadAsync(string url)
         {
             MessageBox.Show("Downloading.");
             using var client = new HttpClient();
             using var s = await client.GetStreamAsync(url);
-            
+
             using var fs = new FileStream(url.Split('/').Last(), FileMode.OpenOrCreate);
             await s.CopyToAsync(fs);
             MessageBox.Show("Download finished. Opening download directory.");
-            Process.Start("explorer.exe",Environment.CurrentDirectory);
+            Process.Start("explorer.exe", Environment.CurrentDirectory);
+        }
+
+        private void EagleLoxMonitorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Form a = new EagleLoxMonitor();
+            a.Show();
         }
     }
 }
