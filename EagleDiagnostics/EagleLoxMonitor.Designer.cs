@@ -34,6 +34,7 @@ namespace EagleDiagnostics
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EagleLoxMonitor));
             mainListBox = new ListBox();
             autoSaveTimer = new System.Windows.Forms.Timer(components);
             checkBox1 = new CheckBox();
@@ -47,6 +48,7 @@ namespace EagleDiagnostics
             ppsTextLabel = new Label();
             totalPacketLabel = new Label();
             totalTextLabel = new Label();
+            mainProgressBar = new ProgressBar();
             SuspendLayout();
             // 
             // mainListBox
@@ -112,9 +114,7 @@ namespace EagleDiagnostics
             // 
             // openFileDialog1
             // 
-            openFileDialog1.FileName = "";
             openFileDialog1.Filter = "Loxone Monitor or Txt|*.LxMon;*.txt|Loxone Monitor|*.LxMon|Text File|*.txt";
-            
             // 
             // receiveButton
             // 
@@ -177,11 +177,23 @@ namespace EagleDiagnostics
             totalTextLabel.TabIndex = 8;
             totalTextLabel.Text = "Total packets received: ";
             // 
+            // mainProgressBar
+            // 
+            mainProgressBar.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            mainProgressBar.Location = new Point(684, 518);
+            mainProgressBar.Name = "mainProgressBar";
+            mainProgressBar.Size = new Size(249, 23);
+            mainProgressBar.Step = 1;
+            mainProgressBar.Style = ProgressBarStyle.Continuous;
+            mainProgressBar.TabIndex = 9;
+            // 
             // EagleLoxMonitor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackColor = SystemColors.Control;
             ClientSize = new Size(938, 545);
+            Controls.Add(mainProgressBar);
             Controls.Add(totalTextLabel);
             Controls.Add(totalPacketLabel);
             Controls.Add(ppsTextLabel);
@@ -191,18 +203,19 @@ namespace EagleDiagnostics
             Controls.Add(saveButton);
             Controls.Add(checkBox1);
             Controls.Add(mainListBox);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             KeyPreview = true;
             Margin = new Padding(4, 3, 4, 3);
             MinimumSize = new Size(464, 225);
             Name = "EagleLoxMonitor";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "EagleLoxMonitor";
+            FormClosing += EagleLoxMonitor_FormClosing;
             KeyDown += Form1_KeyDown;
             ResumeLayout(false);
             PerformLayout();
-            this.FormClosing += EagleLoxMonitor_FormClosing;
         }
-        
+
 
 
 
@@ -221,5 +234,6 @@ namespace EagleDiagnostics
         private Label ppsTextLabel;
         private Label totalPacketLabel;
         private Label totalTextLabel;
+        private ProgressBar mainProgressBar;
     }
 }

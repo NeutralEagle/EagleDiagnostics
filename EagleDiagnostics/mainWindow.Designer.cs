@@ -55,11 +55,11 @@
             russianToolStripMenuItem = new ToolStripMenuItem();
             slovakianToolStripMenuItem = new ToolStripMenuItem();
             turkishToolStripMenuItem = new ToolStripMenuItem();
+            toolsToolStripMenuItem = new ToolStripMenuItem();
+            eagleLoxMonitorToolStripMenuItem = new ToolStripMenuItem();
             buttonUpdateCheck = new Button();
             labelLastVersion = new Label();
             comboReleaseType = new ComboBox();
-            toolsToolStripMenuItem = new ToolStripMenuItem();
-            eagleLoxMonitorToolStripMenuItem = new ToolStripMenuItem();
             menuStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -286,6 +286,20 @@
             turkishToolStripMenuItem.Text = "TRK - Turkish";
             turkishToolStripMenuItem.Click += TurkishToolStripMenuItem_Click;
             // 
+            // toolsToolStripMenuItem
+            // 
+            toolsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { eagleLoxMonitorToolStripMenuItem });
+            toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
+            toolsToolStripMenuItem.Size = new Size(46, 20);
+            toolsToolStripMenuItem.Text = "Tools";
+            // 
+            // eagleLoxMonitorToolStripMenuItem
+            // 
+            eagleLoxMonitorToolStripMenuItem.Name = "eagleLoxMonitorToolStripMenuItem";
+            eagleLoxMonitorToolStripMenuItem.Size = new Size(164, 22);
+            eagleLoxMonitorToolStripMenuItem.Text = "EagleLoxMonitor";
+            eagleLoxMonitorToolStripMenuItem.Click += EagleLoxMonitorToolStripMenuItem_Click;
+            // 
             // buttonUpdateCheck
             // 
             buttonUpdateCheck.Location = new Point(705, 375);
@@ -319,26 +333,13 @@
             comboReleaseType.Size = new Size(88, 23);
             comboReleaseType.TabIndex = 9;
             // 
-            // toolsToolStripMenuItem
-            // 
-            toolsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { eagleLoxMonitorToolStripMenuItem });
-            toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
-            toolsToolStripMenuItem.Size = new Size(46, 20);
-            toolsToolStripMenuItem.Text = "Tools";
-            // 
-            // eagleLoxMonitorToolStripMenuItem
-            // 
-            eagleLoxMonitorToolStripMenuItem.Name = "eagleLoxMonitorToolStripMenuItem";
-            eagleLoxMonitorToolStripMenuItem.Size = new Size(180, 22);
-            eagleLoxMonitorToolStripMenuItem.Text = "EagleLoxMonitor";
-            eagleLoxMonitorToolStripMenuItem.Click += EagleLoxMonitorToolStripMenuItem_Click;
-            // 
             // MainWindow
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackgroundImage = Properties.Resources.Background;
-            BackgroundImageLayout = ImageLayout.Center;
+            BackColor = Color.Black;
+            BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
+            BackgroundImageLayout = ImageLayout.Zoom;
             ClientSize = new Size(804, 441);
             Controls.Add(comboReleaseType);
             Controls.Add(labelLastVersion);
@@ -350,6 +351,7 @@
             Controls.Add(comboConfigVersion);
             Controls.Add(comboConfigLanguage);
             Controls.Add(menuStrip1);
+            DoubleBuffered = true;
             FormBorderStyle = FormBorderStyle.FixedSingle;
             Icon = (Icon)resources.GetObject("$this.Icon");
             MainMenuStrip = menuStrip1;

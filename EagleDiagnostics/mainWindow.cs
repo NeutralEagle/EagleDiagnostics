@@ -585,6 +585,7 @@ namespace EagleDiagnostics
 
         private void ButtonUpdateCheck_Click(object sender, EventArgs e)
         {
+            if (comboConfigVersion.Items.Count ==0 ) 
             configVersionList.Clear();
             errorflag = false;
             foreach (var a in comboConfigVersion.Items)
