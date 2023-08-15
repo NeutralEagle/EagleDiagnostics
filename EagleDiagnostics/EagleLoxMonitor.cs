@@ -183,7 +183,6 @@ namespace EagleDiagnostics
         }
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
-
             if (e.Control == true && e.KeyCode == Keys.C)
             {
                 Clipboard.SetText(string.Join(Environment.NewLine, mainListBox.SelectedItems.OfType<string>()));

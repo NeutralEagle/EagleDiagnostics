@@ -7,6 +7,11 @@ namespace EagleDiagnostics
     using MyProg;
     using System.Net;
     using System.Threading.Tasks;
+    using EagleDiagnostics.Properties;
+    using System.Resources;
+    using System.Windows.Forms;
+    using System.Threading;
+    using System;
 
 
     //TODO
@@ -24,13 +29,16 @@ namespace EagleDiagnostics
 
     public partial class MainWindow : Form
     {
+
+        static string downloadLabelString = "";
+        string backgroundPath = "";
         static bool errorflag;
         readonly string appDataLocal = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         readonly string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         string configDirectoryPath = "";
         private readonly List<int> configVersionList = new() { };
         int subdirlevel = 0;
-        readonly List<string> languageList = new() { "CAT", "CHS", "CSY", "DEU", "ENG", "ENU", "ESN", "FRA", "ITA", "HUN", "NLD", "NOR", "PLK", "ROM", "RUS", "SKY", "TRK" };
+        readonly List<string> languageList = new() { "CAT", "CHS", "CSY", "DEU", "ENG", "ENU", "ESN", "FRA", "ITA", "HUN", "NLD", "NOR", "PLK", "ROM", "RUS", "SKY", "TRK", "BGR", "VNM" };
         public MainWindow()
         {
 
@@ -61,11 +69,13 @@ namespace EagleDiagnostics
         {
             string path = "";
             var di = new DirectoryInfo(dir);
-            var directories = di.EnumerateDirectories()
-                                .OrderBy(d => d.CreationTime)
-                                .Select(d => d.Name)
-                                .ToList();
-
+            try
+            {
+                var directories = di.EnumerateDirectories()
+                                    .OrderBy(d => d.CreationTime)
+                                    .Select(d => d.Name)
+                                    .ToList();
+            
             foreach (string subdirectory in directories)
             {
                 path = $"{dir}\\{subdirectory}";
@@ -89,6 +99,8 @@ namespace EagleDiagnostics
 
                 if (subdirlevel > 0) subdirlevel--;
             }
+            }
+            catch(Exception ex) { MessageBox.Show(ex.Message);  }
             comboConfigVersion.SelectedIndex = comboConfigVersion.Items.Count - 1;
         }
 
@@ -117,6 +129,7 @@ namespace EagleDiagnostics
             Process.Start($"{appDataLocal}\\Programs\\kerberos\\Loxone.exe", debugAttr);
         }
 
+        #region INI saving and loading
         private void MainWindow_FormClosing(Object sender, FormClosingEventArgs e)
         {
             if (Directory.Exists($"{appData}\\EagleDiagnostics"))
@@ -145,9 +158,10 @@ namespace EagleDiagnostics
             if (polishToolStripMenuItem.Checked) MyIni.Write("PLK", "1", "LanguageList");
             if (romanianToolStripMenuItem.Checked) MyIni.Write("ROM", "1", "LanguageList");
             if (russianToolStripMenuItem.Checked) MyIni.Write("RUS", "1", "LanguageList");
-            if (russianToolStripMenuItem.Checked) MyIni.Write("SKY", "1", "LanguageList");
+            if (slovakianToolStripMenuItem.Checked) MyIni.Write("SKY", "1", "LanguageList");
             if (turkishToolStripMenuItem.Checked) MyIni.Write("TRK", "1", "LanguageList");
-
+            if (bulgarianToolStripMenuItem.Checked) MyIni.Write("BGR", "1", "LanguageList");
+            if (vietnameseToolStripMenuItem.Checked) MyIni.Write("VNM", "1", "LanguageList");
 
 
             foreach (string item in comboConfigVersion.Items)
@@ -168,6 +182,10 @@ namespace EagleDiagnostics
                 MyIni.Write("DefaultDebugCheck", "0", "Misc");
             if (comboReleaseType.SelectedItem != null)
                 MyIni.Write("ReleaseType", comboReleaseType.SelectedItem.ToString(), "Misc");
+            if (BackgroundImage != Resources.LoxBg)
+                MyIni.Write("Background", backgroundPath, "Misc");
+            else
+                MyIni.Write("Background", "LoxBg", "Misc");
 
 
         }
@@ -215,6 +233,8 @@ namespace EagleDiagnostics
                 if (MyIni.Read("RUS", "LanguageList") == "1") russianToolStripMenuItem.Checked = true;
                 if (MyIni.Read("SKY", "LanguageList") == "1") slovakianToolStripMenuItem.Checked = true;
                 if (MyIni.Read("TRK", "LanguageList") == "1") turkishToolStripMenuItem.Checked = true;
+                if (MyIni.Read("BGR", "LanguageList") == "1") bulgarianToolStripMenuItem.Checked = true;
+                if (MyIni.Read("VNM", "LanguageList") == "1") vietnameseToolStripMenuItem.Checked = true;
 
                 if (MyIni.KeyExists("DefaultVer", "Misc"))
                     comboConfigVersion.SelectedItem = MyIni.Read("DefaultVer", "Misc");
@@ -233,7 +253,15 @@ namespace EagleDiagnostics
                     else checkBoxAppDebug.Checked = false;
                 else checkBoxAppDebug.Checked = false;
 
-
+                if (MyIni.KeyExists("Background", "Misc"))
+                {
+                    var bg = MyIni.Read("Background", "Misc");
+                    if (bg != "LoxBg")
+                    {
+                        backgroundPath = bg;
+                        SwitchBackground();
+                    }
+                }
 
 
             }
@@ -272,12 +300,14 @@ namespace EagleDiagnostics
             }
 
         }
-
+        #endregion
         private void FirstStart()
         {
             RescanConfigInstallations();
             CreateIni(languageList);
             FillLangCombo(languageList);
+            comboReleaseType.SelectedIndex = 0;
+            comboConfigLanguage.SelectedIndex = 4;
         }
 
         private string FindConfig()
@@ -581,15 +611,50 @@ namespace EagleDiagnostics
                 comboConfigLanguage.SelectedIndex = comboConfigLanguage.Items.Count - 1;
             }
         }
+
+        private void BulgarianToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (bulgarianToolStripMenuItem.Checked && !comboConfigLanguage.Items.Contains("BGR"))
+            {
+                comboConfigLanguage.Items.Add("BGR");
+                comboConfigLanguage.SelectedIndex = comboConfigLanguage.Items.IndexOf("BGR");
+            }
+            else if (!bulgarianToolStripMenuItem.Checked)
+            {
+                comboConfigLanguage.Items.Remove("BGR");
+                comboConfigLanguage.SelectedIndex = comboConfigLanguage.Items.Count - 1;
+            }
+        }
+
+        private void VietnameseToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (vietnameseToolStripMenuItem.Checked && !comboConfigLanguage.Items.Contains("VNM"))
+            {
+                comboConfigLanguage.Items.Add("VNM");
+                comboConfigLanguage.SelectedIndex = comboConfigLanguage.Items.IndexOf("VNM");
+            }
+            else if (!vietnameseToolStripMenuItem.Checked)
+            {
+                comboConfigLanguage.Items.Remove("VNM");
+                comboConfigLanguage.SelectedIndex = comboConfigLanguage.Items.Count - 1;
+            }
+        }
+
         #endregion
 
         private void ButtonUpdateCheck_Click(object sender, EventArgs e)
         {
-            if (comboConfigVersion.Items.Count ==0 ) 
-            configVersionList.Clear();
+            timer1.Start();
+            if (comboConfigVersion.Items.Count == 0)
+            {
+                configVersionList.Clear();
+                
+            }
+            
             errorflag = false;
             foreach (var a in comboConfigVersion.Items)
             {
+
                 string version = ConfigVersion($"{configDirectoryPath}\\{a}\\LoxoneConfig.exe");
                 string[] versionArr = version.Split('.');
                 int n = 0;
@@ -603,7 +668,9 @@ namespace EagleDiagnostics
                 configVersionList.Add(Convert.ToInt32(stringBuilder.ToString()));
             }
             if (errorflag) MessageBox.Show("Missing one or more Loxone Config.exe from list. Please rescan and re-run UpdateCheck");
-            int max = configVersionList.Max();
+            int max;
+            if (configVersionList.Count > 0) max = configVersionList.Max();
+                else max = 0;
             labelLastVersion.Text = $"Last installed version: {max}";
             XmlNode xml = HttpGetXML("http://update.loxone.com/updatecheck.xml");
             int ver = 0;
@@ -662,6 +729,7 @@ namespace EagleDiagnostics
 
         }
 
+
         private static XmlNode HttpGetXML(string url)
         {
 #pragma warning disable SYSLIB0014 // Typ nebo èlen je zastaralý.
@@ -677,22 +745,150 @@ namespace EagleDiagnostics
             return xmlDoc;
 
         }
+
         private static async Task DownloadAsync(string url)
         {
-            MessageBox.Show("Downloading.");
-            using var client = new HttpClient();
-            using var s = await client.GetStreamAsync(url);
+            var destinationFilePath = Path.GetFullPath("Config.zip");
 
-            using var fs = new FileStream(url.Split('/').Last(), FileMode.OpenOrCreate);
-            await s.CopyToAsync(fs);
-            MessageBox.Show("Download finished. Opening download directory.");
-            Process.Start("explorer.exe", Environment.CurrentDirectory);
+            using (var client = new HttpClientDownloadWithProgress(url, destinationFilePath))
+            {
+                client.ProgressChanged += (totalFileSize, totalBytesDownloaded, progressPercentage) =>
+                {
+                    var megaBytesDownloaded = totalBytesDownloaded / 1000000;
+                    var megaBytesSize = totalFileSize / 1000000;
+
+                    downloadLabelString = $"{progressPercentage}% ({megaBytesDownloaded}/{megaBytesSize}MB)";
+                };
+
+                await client.StartDownload();
+
+
+            }
+            downloadLabelString = "Download Complete";
+            var destinationFolder = destinationFilePath.Remove(destinationFilePath.Length - 10);
+            System.IO.Compression.ZipFile.ExtractToDirectory(destinationFilePath, destinationFolder, true);
+            File.Delete(destinationFilePath);
+            Process.Start(destinationFolder + "\\LoxoneConfigSetup.exe");
         }
+
 
         private void EagleLoxMonitorToolStripMenuItem_Click(object sender, EventArgs e)
         {
+
             Form a = new EagleLoxMonitor();
             a.Show();
+        }
+
+        #region Background switching
+        private void SwitchBackground()
+        {
+            try
+            {
+                BackgroundImage = Image.FromFile(backgroundPath);
+            }
+            catch (Exception ex) { MessageBox.Show(ex.Message); }
+        }
+
+        private void backgroundToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var backgroundDialogResult = backgroundFileDialog.ShowDialog();
+            if (backgroundDialogResult == DialogResult.OK)
+            {
+                backgroundPath = backgroundFileDialog.FileName;
+                SwitchBackground();
+            }
+        }
+        #endregion
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            downloadLabel.Text = downloadLabelString;
+            if (downloadLabelString == "Download Complete") timer1.Stop();
+        }
+
+
+    }
+    public class HttpClientDownloadWithProgress : IDisposable
+    {
+        private readonly string _downloadUrl;
+        private readonly string _destinationFilePath;
+
+        private HttpClient _httpClient;
+
+        public delegate void ProgressChangedHandler(long? totalFileSize, long totalBytesDownloaded, double? progressPercentage);
+
+        public event ProgressChangedHandler ProgressChanged;
+
+        public HttpClientDownloadWithProgress(string downloadUrl, string destinationFilePath)
+        {
+            _downloadUrl = downloadUrl;
+            _destinationFilePath = destinationFilePath;
+        }
+
+        public async Task StartDownload()
+        {
+            _httpClient = new HttpClient { Timeout = TimeSpan.FromDays(1) };
+
+            using (var response = await _httpClient.GetAsync(_downloadUrl, HttpCompletionOption.ResponseHeadersRead))
+                await DownloadFileFromHttpResponseMessage(response);
+        }
+
+        private async Task DownloadFileFromHttpResponseMessage(HttpResponseMessage response)
+        {
+            response.EnsureSuccessStatusCode();
+
+            var totalBytes = response.Content.Headers.ContentLength;
+
+            using (var contentStream = await response.Content.ReadAsStreamAsync())
+                await ProcessContentStream(totalBytes, contentStream);
+        }
+
+        private async Task ProcessContentStream(long? totalDownloadSize, Stream contentStream)
+        {
+            var totalBytesRead = 0L;
+            var readCount = 0L;
+            var buffer = new byte[8192];
+            var isMoreToRead = true;
+
+            using (var fileStream = new FileStream(_destinationFilePath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
+            {
+                do
+                {
+                    var bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length);
+                    if (bytesRead == 0)
+                    {
+                        isMoreToRead = false;
+                        TriggerProgressChanged(totalDownloadSize, totalBytesRead);
+                        continue;
+                    }
+
+                    await fileStream.WriteAsync(buffer, 0, bytesRead);
+
+                    totalBytesRead += bytesRead;
+                    readCount += 1;
+
+                    if (readCount % 100 == 0)
+                        TriggerProgressChanged(totalDownloadSize, totalBytesRead);
+                }
+                while (isMoreToRead);
+            }
+        }
+
+        private void TriggerProgressChanged(long? totalDownloadSize, long totalBytesRead)
+        {
+            if (ProgressChanged == null)
+                return;
+
+            double? progressPercentage = null;
+            if (totalDownloadSize.HasValue)
+                progressPercentage = Math.Round((double)totalBytesRead / totalDownloadSize.Value * 100, 2);
+
+            ProgressChanged(totalDownloadSize, totalBytesRead, progressPercentage);
+        }
+
+        public void Dispose()
+        {
+            _httpClient?.Dispose();
         }
     }
 }
