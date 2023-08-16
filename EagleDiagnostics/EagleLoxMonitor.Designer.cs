@@ -49,20 +49,22 @@ namespace EagleDiagnostics
             totalPacketLabel = new Label();
             totalTextLabel = new Label();
             mainProgressBar = new ProgressBar();
+            FilterTextBox = new TextBox();
+            FilterButton = new Button();
+            FilterListBox = new ListBox();
             SuspendLayout();
             // 
             // mainListBox
             // 
             mainListBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            mainListBox.Font = new Font("Monospac821 BT", 8.25F, FontStyle.Regular, GraphicsUnit.Point);
+            mainListBox.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point);
             mainListBox.FormattingEnabled = true;
-            mainListBox.ItemHeight = 14;
             mainListBox.Location = new Point(1, 47);
             mainListBox.Margin = new Padding(4, 3, 4, 23);
             mainListBox.Name = "mainListBox";
             mainListBox.ScrollAlwaysVisible = true;
             mainListBox.SelectionMode = SelectionMode.MultiExtended;
-            mainListBox.Size = new Size(935, 466);
+            mainListBox.Size = new Size(935, 459);
             mainListBox.TabIndex = 0;
             // 
             // autoSaveTimer
@@ -187,12 +189,50 @@ namespace EagleDiagnostics
             mainProgressBar.Style = ProgressBarStyle.Continuous;
             mainProgressBar.TabIndex = 9;
             // 
+            // FilterTextBox
+            // 
+            FilterTextBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            FilterTextBox.Location = new Point(203, 16);
+            FilterTextBox.MaximumSize = new Size(2300, 0);
+            FilterTextBox.Name = "FilterTextBox";
+            FilterTextBox.Size = new Size(459, 23);
+            FilterTextBox.TabIndex = 10;
+            // 
+            // FilterButton
+            // 
+            FilterButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            FilterButton.FlatAppearance.BorderColor = Color.Black;
+            FilterButton.Location = new Point(668, 15);
+            FilterButton.Name = "FilterButton";
+            FilterButton.Size = new Size(75, 23);
+            FilterButton.TabIndex = 11;
+            FilterButton.Text = "Filter";
+            FilterButton.UseVisualStyleBackColor = true;
+            FilterButton.Click += FilterButton_Click;
+            // 
+            // FilterListBox
+            // 
+            FilterListBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            FilterListBox.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point);
+            FilterListBox.FormattingEnabled = true;
+            FilterListBox.Location = new Point(1, 47);
+            FilterListBox.Margin = new Padding(4, 3, 4, 23);
+            FilterListBox.Name = "FilterListBox";
+            FilterListBox.ScrollAlwaysVisible = true;
+            FilterListBox.SelectionMode = SelectionMode.MultiExtended;
+            FilterListBox.Size = new Size(935, 459);
+            FilterListBox.TabIndex = 12;
+            FilterListBox.Visible = false;
+            // 
             // EagleLoxMonitor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.Control;
             ClientSize = new Size(938, 545);
+            Controls.Add(FilterListBox);
+            Controls.Add(FilterButton);
+            Controls.Add(FilterTextBox);
             Controls.Add(mainProgressBar);
             Controls.Add(totalTextLabel);
             Controls.Add(totalPacketLabel);
@@ -235,5 +275,8 @@ namespace EagleDiagnostics
         private Label totalPacketLabel;
         private Label totalTextLabel;
         private ProgressBar mainProgressBar;
+        private TextBox FilterTextBox;
+        private Button FilterButton;
+        private ListBox FilterListBox;
     }
 }

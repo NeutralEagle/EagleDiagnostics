@@ -1,3 +1,5 @@
+using System;
+
 namespace EagleDiagnostics
 {
     using System.IO;
@@ -14,15 +16,6 @@ namespace EagleDiagnostics
     using System;
 
 
-    //TODO
-    //Major
-    //Statistics editing
-    //Loxone Monitor
-    //deflog parser
-    //možnost zadat si èísla bugù a sledovat, jejich stav, zda už byly opravené, tedy dám tam nìjaké, které chci sledovat.
-    //
-    //
-    //Minor
 
 
 
@@ -75,32 +68,32 @@ namespace EagleDiagnostics
                                     .OrderBy(d => d.CreationTime)
                                     .Select(d => d.Name)
                                     .ToList();
-            
-            foreach (string subdirectory in directories)
-            {
-                path = $"{dir}\\{subdirectory}";
-                if (File.Exists($"{path}\\LoxoneConfig.exe"))
-                {
-                    string[] configPathSub = path.Split('\\')[^(subdirlevel + 1)..];
-                    string comboItem = "";
-                    foreach (var x in configPathSub)
-                    {
-                        comboItem += $"{x}\\";
-                    }
-                    comboItem = comboItem.TrimEnd('\\');
-                    comboConfigVersion.Items.Add(comboItem);
-                    continue;
-                }
-                else
-                {
-                    subdirlevel++;
-                    HandleDirectory(path);
-                }
 
-                if (subdirlevel > 0) subdirlevel--;
+                foreach (string subdirectory in directories)
+                {
+                    path = $"{dir}\\{subdirectory}";
+                    if (File.Exists($"{path}\\LoxoneConfig.exe"))
+                    {
+                        string[] configPathSub = path.Split('\\')[^(subdirlevel + 1)..];
+                        string comboItem = "";
+                        foreach (var x in configPathSub)
+                        {
+                            comboItem += $"{x}\\";
+                        }
+                        comboItem = comboItem.TrimEnd('\\');
+                        comboConfigVersion.Items.Add(comboItem);
+                        continue;
+                    }
+                    else
+                    {
+                        subdirlevel++;
+                        HandleDirectory(path);
+                    }
+
+                    if (subdirlevel > 0) subdirlevel--;
+                }
             }
-            }
-            catch(Exception ex) { MessageBox.Show(ex.Message);  }
+            catch (Exception ex) { MessageBox.Show(ex.Message); }
             comboConfigVersion.SelectedIndex = comboConfigVersion.Items.Count - 1;
         }
 
@@ -642,15 +635,15 @@ namespace EagleDiagnostics
 
         #endregion
 
-        private void ButtonUpdateCheck_Click(object sender, EventArgs e)
+        private async void ButtonUpdateCheck_Click(object sender, EventArgs e)
         {
             timer1.Start();
             if (comboConfigVersion.Items.Count == 0)
             {
                 configVersionList.Clear();
-                
+
             }
-            
+
             errorflag = false;
             foreach (var a in comboConfigVersion.Items)
             {
@@ -670,9 +663,9 @@ namespace EagleDiagnostics
             if (errorflag) MessageBox.Show("Missing one or more Loxone Config.exe from list. Please rescan and re-run UpdateCheck");
             int max;
             if (configVersionList.Count > 0) max = configVersionList.Max();
-                else max = 0;
+            else max = 0;
             labelLastVersion.Text = $"Last installed version: {max}";
-            XmlNode xml = HttpGetXML("http://update.loxone.com/updatecheck.xml");
+            XmlNode xml = await HttpGetXMLAsync("http://update.loxone.com/updatecheck.xml");
             int ver = 0;
             string? downloadUrl = "";
             if (xml is null)
@@ -729,12 +722,12 @@ namespace EagleDiagnostics
 
         }
 
-
-        private static XmlNode HttpGetXML(string url)
+        /*
+        private static XmlNode HttpGetXMLAsync(string url)
         {
-#pragma warning disable SYSLIB0014 // Typ nebo èlen je zastaralý.
+
             HttpWebRequest? request = (HttpWebRequest)WebRequest.Create(url);
-#pragma warning restore SYSLIB0014 // Typ nebo èlen je zastaralý.
+
             XmlDocument xmlDoc = new();
             if (request.GetResponse() is not HttpWebResponse response) { MessageBox.Show("XML request returned null"); }
             else
@@ -744,6 +737,20 @@ namespace EagleDiagnostics
 
             return xmlDoc;
 
+        }*/
+        private static async Task<XmlNode> HttpGetXMLAsync(string url)
+        {
+            using HttpClient client = new();
+            using HttpResponseMessage response = await client.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+
+            using HttpContent content = response.Content;
+            string xmlString = await content.ReadAsStringAsync();
+
+            XmlDocument xmlDoc = new();
+            xmlDoc.LoadXml(xmlString);
+
+            return xmlDoc;
         }
 
         private static async Task DownloadAsync(string url)
@@ -784,12 +791,12 @@ namespace EagleDiagnostics
         {
             try
             {
-                BackgroundImage = Image.FromFile(backgroundPath);
+                backgroundPanel.BackgroundImage = Image.FromFile(backgroundPath);
             }
             catch (Exception ex) { MessageBox.Show(ex.Message); }
         }
 
-        private void backgroundToolStripMenuItem_Click(object sender, EventArgs e)
+        private void BackgroundToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var backgroundDialogResult = backgroundFileDialog.ShowDialog();
             if (backgroundDialogResult == DialogResult.OK)
@@ -800,7 +807,7 @@ namespace EagleDiagnostics
         }
         #endregion
 
-        private void timer1_Tick(object sender, EventArgs e)
+        private void Timer1_Tick(object sender, EventArgs e)
         {
             downloadLabel.Text = downloadLabelString;
             if (downloadLabelString == "Download Complete") timer1.Stop();
@@ -813,11 +820,11 @@ namespace EagleDiagnostics
         private readonly string _downloadUrl;
         private readonly string _destinationFilePath;
 
-        private HttpClient _httpClient;
+        private HttpClient? _httpClient;
 
         public delegate void ProgressChangedHandler(long? totalFileSize, long totalBytesDownloaded, double? progressPercentage);
 
-        public event ProgressChangedHandler ProgressChanged;
+        public event ProgressChangedHandler? ProgressChanged;
 
         public HttpClientDownloadWithProgress(string downloadUrl, string destinationFilePath)
         {
@@ -829,8 +836,8 @@ namespace EagleDiagnostics
         {
             _httpClient = new HttpClient { Timeout = TimeSpan.FromDays(1) };
 
-            using (var response = await _httpClient.GetAsync(_downloadUrl, HttpCompletionOption.ResponseHeadersRead))
-                await DownloadFileFromHttpResponseMessage(response);
+            using var response = await _httpClient.GetAsync(_downloadUrl, HttpCompletionOption.ResponseHeadersRead);
+            await DownloadFileFromHttpResponseMessage(response);
         }
 
         private async Task DownloadFileFromHttpResponseMessage(HttpResponseMessage response)
@@ -839,8 +846,8 @@ namespace EagleDiagnostics
 
             var totalBytes = response.Content.Headers.ContentLength;
 
-            using (var contentStream = await response.Content.ReadAsStreamAsync())
-                await ProcessContentStream(totalBytes, contentStream);
+            using var contentStream = await response.Content.ReadAsStreamAsync();
+            await ProcessContentStream(totalBytes, contentStream);
         }
 
         private async Task ProcessContentStream(long? totalDownloadSize, Stream contentStream)
@@ -850,28 +857,26 @@ namespace EagleDiagnostics
             var buffer = new byte[8192];
             var isMoreToRead = true;
 
-            using (var fileStream = new FileStream(_destinationFilePath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
+            using var fileStream = new FileStream(_destinationFilePath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true);
+            do
             {
-                do
+                var bytesRead = await contentStream.ReadAsync(buffer);
+                if (bytesRead == 0)
                 {
-                    var bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length);
-                    if (bytesRead == 0)
-                    {
-                        isMoreToRead = false;
-                        TriggerProgressChanged(totalDownloadSize, totalBytesRead);
-                        continue;
-                    }
-
-                    await fileStream.WriteAsync(buffer, 0, bytesRead);
-
-                    totalBytesRead += bytesRead;
-                    readCount += 1;
-
-                    if (readCount % 100 == 0)
-                        TriggerProgressChanged(totalDownloadSize, totalBytesRead);
+                    isMoreToRead = false;
+                    TriggerProgressChanged(totalDownloadSize, totalBytesRead);
+                    continue;
                 }
-                while (isMoreToRead);
+
+                await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead));
+
+                totalBytesRead += bytesRead;
+                readCount += 1;
+
+                if (readCount % 100 == 0)
+                    TriggerProgressChanged(totalDownloadSize, totalBytesRead);
             }
+            while (isMoreToRead);
         }
 
         private void TriggerProgressChanged(long? totalDownloadSize, long totalBytesRead)
@@ -888,7 +893,7 @@ namespace EagleDiagnostics
 
         public void Dispose()
         {
-            _httpClient?.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }
