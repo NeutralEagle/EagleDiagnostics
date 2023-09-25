@@ -1,4 +1,6 @@
-using System;
+using System.Reflection;
+
+
 
 namespace EagleDiagnostics
 {
@@ -7,19 +9,13 @@ namespace EagleDiagnostics
     using System.Xml;
     using System.Text;
     using MyProg;
-    using System.Net;
     using System.Threading.Tasks;
     using EagleDiagnostics.Properties;
-    using System.Resources;
     using System.Windows.Forms;
-    using System.Threading;
     using System;
-
-
-
-
-
-
+    using System.Text.Json;
+    using System.Xml.Linq;
+   
     public partial class MainWindow : Form
     {
 
@@ -32,6 +28,7 @@ namespace EagleDiagnostics
         private readonly List<int> configVersionList = new() { };
         int subdirlevel = 0;
         readonly List<string> languageList = new() { "CAT", "CHS", "CSY", "DEU", "ENG", "ENU", "ESN", "FRA", "ITA", "HUN", "NLD", "NOR", "PLK", "ROM", "RUS", "SKY", "TRK", "BGR", "VNM" };
+        
         public MainWindow()
         {
 
@@ -182,6 +179,7 @@ namespace EagleDiagnostics
 
 
         }
+
         private void OnLoadChecks(List<string> languageList)
         {
             var MyIni = new IniFile($"{appData}\\EagleDiagnostics\\config.ini");
@@ -749,7 +747,6 @@ namespace EagleDiagnostics
 
             XmlDocument xmlDoc = new();
             xmlDoc.LoadXml(xmlString);
-
             return xmlDoc;
         }
 
@@ -813,7 +810,10 @@ namespace EagleDiagnostics
             if (downloadLabelString == "Download Complete") timer1.Stop();
         }
 
-
+        private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show(System.Reflection.Assembly.GetAssembly(typeof(EagleLoxMonitor)).GetName().Version.ToString());
+        }
     }
     public class HttpClientDownloadWithProgress : IDisposable
     {

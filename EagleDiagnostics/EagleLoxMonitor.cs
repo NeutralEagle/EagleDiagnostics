@@ -81,7 +81,7 @@ namespace EagleDiagnostics
             {
                 try
                 {
-                        if (!loadFlag) FillData(udpClient.Receive(ref iPEndPoint), true,true);
+                        if (!loadFlag&&udpClient is not null) FillData(udpClient.Receive(ref iPEndPoint), true,true);
                     
                 }
                 catch { }
@@ -426,7 +426,10 @@ namespace EagleDiagnostics
 
                 foreach (var item in mainListBox.Items)
                 {
-                    if (item.ToString().Contains(FilterTextBox.Text, StringComparison.OrdinalIgnoreCase)) FilterListBox.Items.Add(item);
+                    if (item is not null && FilterTextBox.Text is not null && item.ToString()?.Contains(FilterTextBox.Text, StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        FilterListBox.Items.Add(item);
+                    }
                 }
                 FilterListBox.EndUpdate();
             }
@@ -440,6 +443,7 @@ namespace EagleDiagnostics
             {
                 FilterListBox.Visible = true;
                 FilterButton.FlatStyle = FlatStyle.Flat;
+                FilterButton.Enabled = true;
             }
             else
             {
