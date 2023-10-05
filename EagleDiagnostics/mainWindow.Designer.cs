@@ -61,6 +61,8 @@
             backgroundToolStripMenuItem = new ToolStripMenuItem();
             toolsToolStripMenuItem = new ToolStripMenuItem();
             eagleLoxMonitorToolStripMenuItem = new ToolStripMenuItem();
+            helpToolStripMenuItem = new ToolStripMenuItem();
+            aboutToolStripMenuItem = new ToolStripMenuItem();
             buttonUpdateCheck = new Button();
             labelLastVersion = new Label();
             comboReleaseType = new ComboBox();
@@ -68,8 +70,7 @@
             downloadLabel = new Label();
             timer1 = new System.Windows.Forms.Timer(components);
             backgroundPanel = new Panel();
-            helpToolStripMenuItem = new ToolStripMenuItem();
-            aboutToolStripMenuItem = new ToolStripMenuItem();
+            wSSenderToolStripMenuItem = new ToolStripMenuItem();
             menuStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -319,7 +320,7 @@
             // 
             // toolsToolStripMenuItem
             // 
-            toolsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { eagleLoxMonitorToolStripMenuItem });
+            toolsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { eagleLoxMonitorToolStripMenuItem, wSSenderToolStripMenuItem });
             toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             toolsToolStripMenuItem.Size = new Size(46, 20);
             toolsToolStripMenuItem.Text = "Tools";
@@ -327,9 +328,23 @@
             // eagleLoxMonitorToolStripMenuItem
             // 
             eagleLoxMonitorToolStripMenuItem.Name = "eagleLoxMonitorToolStripMenuItem";
-            eagleLoxMonitorToolStripMenuItem.Size = new Size(164, 22);
+            eagleLoxMonitorToolStripMenuItem.Size = new Size(180, 22);
             eagleLoxMonitorToolStripMenuItem.Text = "EagleLoxMonitor";
             eagleLoxMonitorToolStripMenuItem.Click += EagleLoxMonitorToolStripMenuItem_Click;
+            // 
+            // helpToolStripMenuItem
+            // 
+            helpToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { aboutToolStripMenuItem });
+            helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+            helpToolStripMenuItem.Size = new Size(44, 20);
+            helpToolStripMenuItem.Text = "Help";
+            // 
+            // aboutToolStripMenuItem
+            // 
+            aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            aboutToolStripMenuItem.Size = new Size(107, 22);
+            aboutToolStripMenuItem.Text = "About";
+            aboutToolStripMenuItem.Click += AboutToolStripMenuItem_Click;
             // 
             // buttonUpdateCheck
             // 
@@ -393,19 +408,12 @@
             backgroundPanel.Size = new Size(804, 417);
             backgroundPanel.TabIndex = 11;
             // 
-            // helpToolStripMenuItem
+            // wSSenderToolStripMenuItem
             // 
-            helpToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { aboutToolStripMenuItem });
-            helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            helpToolStripMenuItem.Size = new Size(44, 20);
-            helpToolStripMenuItem.Text = "Help";
-            // 
-            // aboutToolStripMenuItem
-            // 
-            aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            aboutToolStripMenuItem.Size = new Size(180, 22);
-            aboutToolStripMenuItem.Text = "About";
-            aboutToolStripMenuItem.Click += AboutToolStripMenuItem_Click;
+            wSSenderToolStripMenuItem.Name = "wSSenderToolStripMenuItem";
+            wSSenderToolStripMenuItem.Size = new Size(180, 22);
+            wSSenderToolStripMenuItem.Text = "WSSender";
+            wSSenderToolStripMenuItem.Click += wSSenderToolStripMenuItem_Click;
             // 
             // MainWindow
             // 
@@ -489,5 +497,6 @@
         private Panel backgroundPanel;
         private ToolStripMenuItem helpToolStripMenuItem;
         private ToolStripMenuItem aboutToolStripMenuItem;
+        private ToolStripMenuItem wSSenderToolStripMenuItem;
     }
 }

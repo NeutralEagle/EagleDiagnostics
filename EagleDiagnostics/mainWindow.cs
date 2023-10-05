@@ -15,7 +15,7 @@ namespace EagleDiagnostics
     using System;
     using System.Text.Json;
     using System.Xml.Linq;
-   
+
     public partial class MainWindow : Form
     {
 
@@ -28,7 +28,7 @@ namespace EagleDiagnostics
         private readonly List<int> configVersionList = new() { };
         int subdirlevel = 0;
         readonly List<string> languageList = new() { "CAT", "CHS", "CSY", "DEU", "ENG", "ENU", "ESN", "FRA", "ITA", "HUN", "NLD", "NOR", "PLK", "ROM", "RUS", "SKY", "TRK", "BGR", "VNM" };
-        
+
         public MainWindow()
         {
 
@@ -812,7 +812,13 @@ namespace EagleDiagnostics
 
         private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(System.Reflection.Assembly.GetAssembly(typeof(EagleLoxMonitor)).GetName().Version.ToString());
+            MessageBox.Show(this.ProductVersion );
+        }
+
+        private void wSSenderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Form a = new WSSender();
+            a.Show();
         }
     }
     public class HttpClientDownloadWithProgress : IDisposable
