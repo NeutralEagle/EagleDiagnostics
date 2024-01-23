@@ -40,6 +40,7 @@
             btnSend = new Button();
             panel = new Panel();
             logger = new RichTextBox();
+            nfcPlotBtn = new Button();
             SuspendLayout();
             // 
             // msTextBox
@@ -67,7 +68,7 @@
             pwTextBox.Name = "pwTextBox";
             pwTextBox.Size = new Size(100, 23);
             pwTextBox.TabIndex = 2;
-            pwTextBox.Text = "password";
+            pwTextBox.Text = "pass";
             pwTextBox.UseSystemPasswordChar = true;
             // 
             // deviceTextBox
@@ -77,7 +78,7 @@
             deviceTextBox.Name = "deviceTextBox";
             deviceTextBox.Size = new Size(100, 23);
             deviceTextBox.TabIndex = 3;
-            deviceTextBox.Text = "deviceSN";
+            deviceTextBox.Text = "Device_SN";
             // 
             // btnGetvar
             // 
@@ -163,11 +164,23 @@
             logger.TabIndex = 11;
             logger.Text = "";
             // 
+            // nfcPlotBtn
+            // 
+            nfcPlotBtn.Enabled = false;
+            nfcPlotBtn.Location = new Point(597, 826);
+            nfcPlotBtn.Name = "nfcPlotBtn";
+            nfcPlotBtn.Size = new Size(75, 23);
+            nfcPlotBtn.TabIndex = 12;
+            nfcPlotBtn.Text = "NFCPlot";
+            nfcPlotBtn.UseVisualStyleBackColor = true;
+            nfcPlotBtn.Visible = false;
+            // 
             // WSSender
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1384, 861);
+            Controls.Add(nfcPlotBtn);
             Controls.Add(logger);
             Controls.Add(panel);
             Controls.Add(btnSend);
@@ -201,5 +214,6 @@
         private Button btnSend;
         private Panel panel;
         private RichTextBox logger;
+        private Button nfcPlotBtn;
     }
 }

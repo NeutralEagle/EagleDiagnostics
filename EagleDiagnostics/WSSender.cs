@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
@@ -14,7 +15,10 @@ namespace EagleDiagnostics
     public partial class WSSender : Form
     {
         public static string finalHost = "";
+        public static string finalUrl = "";
         public static string deviceSN = "";
+        public static string msSN = "";
+        public static string httpPrefix = "https://";
         static string login;
 
         Dictionary<string, string> shellVarValuePairs = new Dictionary<string, string>();
@@ -24,14 +28,62 @@ namespace EagleDiagnostics
             logger.TextChanged += logger_TextChanged;
         }
 
+        private bool checkSN(string input)
+        {
+            msSN = Regex.Replace(input, "[^a-fA-F0-9]", "").ToUpper();
+            /*if (msSN.Length == 12 && (msSN.StartsWith("EEE000")|| msSN.StartsWith("504F94")))
+            char msTypeChar = msSN[6];
+            if (msTypeChar == 'A'||msTypeChar =='D') httpPrefix = "https://";
+            else if (msTypeChar == '1') httpPrefix = "http://";
+            else return false;
+            return true;
+            {
+                char msTypeChar = msSN[6];
+                if (msTypeChar == 'A'||msTypeChar =='D') httpPrefix = "https://";
+                else if (msTypeChar == '1') httpPrefix = "http://";
+                else return false;
+                return true;
+            }
+            else if */
+            if (msSN.Length == 12)
+            {
+                if (msSN.StartsWith("504F94A") || msSN.StartsWith("504F94D")) httpPrefix = "https://";
+                else if (msSN.StartsWith("EEE000") || msSN.StartsWith("504F941")) httpPrefix = "http://";
+                else return false;
+            }
+            return true;
+        }
+        private async Task CheckFinalURL()
+        {
+            if (deviceSN == "") deviceSN = deviceTextBox.Text;
+            deviceSN = Regex.Replace(deviceSN, "[^a-zA-Z0-9]", "");
+
+
+            string initialUrl = $"{httpPrefix}dns.loxonecloud.com/{msSN}";
+            string url = await GetRedirectedUrlAsync(initialUrl, login);
+            if (url != null)
+            {
+                finalHost = GetHostFromUrl(url);
+                finalUrl = $"{url}dev/sys/wsdevice/{deviceSN}/getvar";
+            }
+            else { MessageBox.Show("Unable to connect, please check MS SN and login info"); }
+
+
+        }
         private async void button1_Click(object sender, EventArgs e)
         {
-            deviceSN = deviceTextBox.Text;
-            string initialUrl = $"https://dns.loxonecloud.com/{msTextBox.Text}/dev/sys/wsdevice/{deviceSN}/getvar";
-            login = EncodeToBase64(userTextBox.Text, pwTextBox.Text);
+            if (checkSN(msTextBox.Text) == false)
+            {
+                MessageBox.Show("Invalid MS Serial number");
+                return;
+            }
 
-            string finalUrl = await GetRedirectedUrlAsync(initialUrl, login);
-            finalHost = GetHostFromUrl(finalUrl);
+
+            deviceSN = deviceTextBox.Text;
+            login = EncodeToBase64(userTextBox.Text, pwTextBox.Text);
+            await CheckFinalURL();
+
+
             if (!string.IsNullOrEmpty(finalUrl))
             {
                 string xmlData = await GetXmlDataAsync(finalUrl, login);
@@ -66,7 +118,7 @@ namespace EagleDiagnostics
                     Text = shellVar,
                     Location = new Point(x, y)
                 };
-                string url = $"https://{finalHost}/dev/sys/wsdevice/{deviceSN}/get/{shellVar}";
+                string url = $"{httpPrefix}{finalHost}/dev/sys/wsdevice/{deviceSN}/get/{shellVar}";
                 TextBox textBox = new TextBox()
                 {
 
@@ -134,8 +186,9 @@ namespace EagleDiagnostics
         {
             using (HttpClient client = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false }))
             {
+
                 // Set the Authorization header
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", accessToken);
+                //client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", accessToken);
 
                 HttpResponseMessage response = await client.GetAsync(initialUrl);
 
@@ -253,18 +306,19 @@ namespace EagleDiagnostics
             if (command == "erase")
                 foreach (var shellVar in shellVarValuePairs)
                 {
-                    SendWebServiceRequest($"https://{finalHost}/dev/sys/wsdevice/{deviceSN}/{command}/{shellVar.Key}", login, logger);
+                    SendWebServiceRequest($"{httpPrefix}{finalHost}/dev/sys/wsdevice/{deviceSN}/{command}/{shellVar.Key}", login, logger);
                 }
             else
                 foreach (var shellVar in shellVarValuePairs)
                 {
-                    SendWebServiceRequest($"https://{finalHost}/dev/sys/wsdevice/{deviceSN}/{command}/{shellVar.Key}/{shellVar.Value}", login, logger);
+                    SendWebServiceRequest($"{httpPrefix}{finalHost}/dev/sys/wsdevice/{deviceSN}/{command}/{shellVar.Key}/{shellVar.Value}", login, logger);
                 }
         }
 
         private void btnReboot_Click(object sender, EventArgs e)
         {
-            SendWebServiceRequest($"https://{finalHost}/dev/sys/wsdevice/{deviceSN}/Reboot", login, logger);
+            CheckFinalURL();
+            SendWebServiceRequest($"{httpPrefix}{finalHost}/dev/sys/wsdevice/{deviceSN}/Reboot", login, logger);
         }
         private void logger_TextChanged(object sender, EventArgs e)
         {
@@ -272,6 +326,13 @@ namespace EagleDiagnostics
             logger.SelectionStart = logger.Text.Length;
             // scroll it automatically
             logger.ScrollToCaret();
+        }
+
+        private void nfcPlotBtn_Click(object sender, EventArgs e)
+        {
+            CheckFinalURL();
+            Form b = new NFCPlot($"{httpPrefix}{finalHost}", deviceSN, userTextBox.Text, pwTextBox.Text);
+            b.Show();
         }
     }
 }

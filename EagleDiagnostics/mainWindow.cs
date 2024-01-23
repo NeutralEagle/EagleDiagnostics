@@ -812,7 +812,7 @@ namespace EagleDiagnostics
 
         private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(this.ProductVersion );
+            MessageBox.Show(this.ProductVersion);
         }
 
         private void wSSenderToolStripMenuItem_Click(object sender, EventArgs e)
