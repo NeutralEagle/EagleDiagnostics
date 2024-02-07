@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(WSSender));
             msTextBox = new TextBox();
             userTextBox = new TextBox();
             pwTextBox = new TextBox();
@@ -193,6 +194,7 @@
             Controls.Add(pwTextBox);
             Controls.Add(userTextBox);
             Controls.Add(msTextBox);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             MinimumSize = new Size(700, 900);
             Name = "WSSender";
             Text = "WSSender";

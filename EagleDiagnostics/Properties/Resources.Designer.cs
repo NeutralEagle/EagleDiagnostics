@@ -63,9 +63,9 @@ namespace EagleDiagnostics.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
-        internal static System.Drawing.Icon lenka_ico {
+        internal static System.Drawing.Icon LogoEagle {
             get {
-                object obj = ResourceManager.GetObject("lenka_ico", resourceCulture);
+                object obj = ResourceManager.GetObject("LogoEagle", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
             }
         }
