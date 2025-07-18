@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
-    <ApplicationIcon>Properties\lenka_ico.ico</ApplicationIcon>
+    <ApplicationIcon>Resources\LogoEagle.ico</ApplicationIcon>
 	<ProductVersion>0.8.18</ProductVersion>
 	<AssemblyVersion>1.1.23.24</AssemblyVersion>
 	<FileVersion>1.1.23.24</FileVersion>
@@ -32,7 +32,7 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="ZedGraph" Version="5.1.7" />
+    <PackageReference Include="ZedGraph" Version="5.2.0" />
   </ItemGroup>
 
   <ItemGroup>

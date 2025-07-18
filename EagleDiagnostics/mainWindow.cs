@@ -51,8 +51,14 @@ namespace EagleDiagnostics
         private void RescanConfigInstallations()
         {
             comboConfigVersion.Items.Clear();
-            HandleDirectory(configDirectoryPath);
-
+            if (configDirectoryPath != "")
+            {
+                HandleDirectory(configDirectoryPath);
+            }
+            else
+            {
+                HandleDirectory("C:\\Program Files (x86)\\Loxone");
+            }
         }
 
         private void HandleDirectory(string dir)
@@ -116,7 +122,10 @@ namespace EagleDiagnostics
             {
                 debugAttr = "--debug";
             }
-            Process.Start($"{appDataLocal}\\Programs\\kerberos\\Loxone.exe", debugAttr);
+            if (File.Exists($"{appDataLocal}\\Programs\\kerberos\\Loxone.exe"))
+                Process.Start($"{appDataLocal}\\Programs\\kerberos\\Loxone.exe", debugAttr);
+            else MessageBox.Show("No Loxone App found, please install it first.");
+            
         }
 
         #region INI saving and loading
@@ -304,23 +313,26 @@ namespace EagleDiagnostics
         private string FindConfig()
         {
             string configPath = ExternalHelpers.RegistryRead("SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\LoxoneConfig_is1", "InstallLocation");
-
-            string[] configDirectoryPathArr = configPath.Split("\\");
-            int i = 0;
-
-            foreach (var x in configDirectoryPathArr)
+            if (configPath != "")
             {
-                configDirectoryPath += $"{configDirectoryPathArr[i]}\\";
-                if (x == "Loxone")
-                {
-                    break;
-                }
-                else
-                {
-                    i++;
-                }
+                string[] configDirectoryPathArr = configPath.Split("\\");
+                int i = 0;
 
+                foreach (var x in configDirectoryPathArr)
+                {
+                    configDirectoryPath += $"{configDirectoryPathArr[i]}\\";
+                    if (x == "Loxone")
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        i++;
+                    }
+
+                }
             }
+            else configDirectoryPath = "C:\\Program Files (x86)\\Loxone";
             return configDirectoryPath;
         }
 
