@@ -32,7 +32,7 @@ jobs:
           --no-restore
           -p:PublishSingleFile=true
           -p:SelfContained=false
-          -p:PublishTrimmed=true
+          -p:PublishTrimmed=false
           -p:PublishReadyToRun=false
           -p:EnableCompressionInSingleFile=true
           -p:DebugType=None
