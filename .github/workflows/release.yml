@@ -22,11 +22,11 @@ jobs:
           dotnet-version: 6.0.x
 
       - name: Restore (win-x64)
-        run: dotnet restore .\EagleDiagnostics\EagleDiagnostics\EagleDiagnostics.csproj -r win-x64
+        run: dotnet restore .\EagleDiagnostics\EagleDiagnostics.csproj -r win-x64
 
       - name: Publish (win-x64, single-file)
         run: >
-          dotnet publish .\EagleDiagnostics\EagleDiagnostics\EagleDiagnostics.csproj
+          dotnet publish .\EagleDiagnostics\EagleDiagnostics.csproj
           -c Release
           -r win-x64
           --no-restore
