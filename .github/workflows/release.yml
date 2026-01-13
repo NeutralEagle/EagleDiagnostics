@@ -34,7 +34,7 @@ jobs:
           -p:SelfContained=false
           -p:PublishTrimmed=false
           -p:PublishReadyToRun=false
-          -p:EnableCompressionInSingleFile=true
+          -p:EnableCompressionInSingleFile=false
           -p:DebugType=None
           -o .\publish
 
