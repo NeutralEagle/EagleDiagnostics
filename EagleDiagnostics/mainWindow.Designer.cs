@@ -71,6 +71,7 @@
             downloadLabel = new Label();
             timer1 = new System.Windows.Forms.Timer(components);
             backgroundPanel = new Panel();
+            openGitHubPageToolStripMenuItem = new ToolStripMenuItem();
             menuStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -324,26 +325,26 @@
             // 
             toolsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { eagleLoxMonitorToolStripMenuItem, wSSenderToolStripMenuItem });
             toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
-            toolsToolStripMenuItem.Size = new Size(46, 20);
+            toolsToolStripMenuItem.Size = new Size(47, 20);
             toolsToolStripMenuItem.Text = "Tools";
             // 
             // eagleLoxMonitorToolStripMenuItem
             // 
             eagleLoxMonitorToolStripMenuItem.Name = "eagleLoxMonitorToolStripMenuItem";
-            eagleLoxMonitorToolStripMenuItem.Size = new Size(164, 22);
+            eagleLoxMonitorToolStripMenuItem.Size = new Size(163, 22);
             eagleLoxMonitorToolStripMenuItem.Text = "EagleLoxMonitor";
             eagleLoxMonitorToolStripMenuItem.Click += EagleLoxMonitorToolStripMenuItem_Click;
             // 
             // wSSenderToolStripMenuItem
             // 
             wSSenderToolStripMenuItem.Name = "wSSenderToolStripMenuItem";
-            wSSenderToolStripMenuItem.Size = new Size(164, 22);
+            wSSenderToolStripMenuItem.Size = new Size(163, 22);
             wSSenderToolStripMenuItem.Text = "WSSender";
             wSSenderToolStripMenuItem.Click += wSSenderToolStripMenuItem_Click;
             // 
             // helpToolStripMenuItem
             // 
-            helpToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { aboutToolStripMenuItem });
+            helpToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { aboutToolStripMenuItem, openGitHubPageToolStripMenuItem });
             helpToolStripMenuItem.Name = "helpToolStripMenuItem";
             helpToolStripMenuItem.Size = new Size(44, 20);
             helpToolStripMenuItem.Text = "Help";
@@ -351,7 +352,7 @@
             // aboutToolStripMenuItem
             // 
             aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            aboutToolStripMenuItem.Size = new Size(107, 22);
+            aboutToolStripMenuItem.Size = new Size(180, 22);
             aboutToolStripMenuItem.Text = "About";
             aboutToolStripMenuItem.Click += AboutToolStripMenuItem_Click;
             // 
@@ -416,6 +417,13 @@
             backgroundPanel.Name = "backgroundPanel";
             backgroundPanel.Size = new Size(804, 417);
             backgroundPanel.TabIndex = 11;
+            // 
+            // openGitHubPageToolStripMenuItem
+            // 
+            openGitHubPageToolStripMenuItem.Name = "openGitHubPageToolStripMenuItem";
+            openGitHubPageToolStripMenuItem.Size = new Size(180, 22);
+            openGitHubPageToolStripMenuItem.Text = "Open GitHub page";
+            openGitHubPageToolStripMenuItem.Click += openGitHubPageToolStripMenuItem_Click;
             // 
             // MainWindow
             // 
@@ -500,5 +508,6 @@
         private ToolStripMenuItem helpToolStripMenuItem;
         private ToolStripMenuItem aboutToolStripMenuItem;
         private ToolStripMenuItem wSSenderToolStripMenuItem;
+        private ToolStripMenuItem openGitHubPageToolStripMenuItem;
     }
 }

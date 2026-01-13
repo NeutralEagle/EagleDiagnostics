@@ -125,7 +125,7 @@ namespace EagleDiagnostics
             if (File.Exists($"{appDataLocal}\\Programs\\kerberos\\Loxone.exe"))
                 Process.Start($"{appDataLocal}\\Programs\\kerberos\\Loxone.exe", debugAttr);
             else MessageBox.Show("No Loxone App found, please install it first.");
-            
+
         }
 
         #region INI saving and loading
@@ -833,6 +833,17 @@ namespace EagleDiagnostics
         {
             Form a = new WSSender();
             a.Show();
+        }
+
+        private void openGitHubPageToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var url = "https://github.com/NeutralEagle/EagleDiagnostics";
+
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            });
         }
     }
     public class HttpClientDownloadWithProgress : IDisposable
