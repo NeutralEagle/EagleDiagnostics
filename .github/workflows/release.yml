@@ -1,44 +1,43 @@
-name: Build and Release (Windows)
+name: Build and Release
 
 on:
   push:
     tags:
-      - "v*"
-
-permissions:
-  contents: write
+      - 'v*'  # Triggers only on version tags like v2025.07.22.42
 
 jobs:
   build:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 6.0.x
+          dotnet-version: '6.0.x'
 
       - name: Restore dependencies
         run: dotnet restore
 
-      - name: Publish single-file (framework-dependent)
-        run: >
-          dotnet publish
-          -c Release
-          --no-build
-          -p:PublishSingleFile=true
-          -p:SelfContained=false
-          -p:PublishTrimmed=true
-          -p:PublishReadyToRun=false
-          -p:EnableCompressionInSingleFile=true
-          -p:DebugType=None
-          -o ./publish
+      - name: Build in Release mode
+        run: dotnet build --configuration Release --no-restore
 
+      - name: Publish single .exe
+        run: dotnet publish -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -o ./publish
 
-      - name: Create GitHub Release
+      - name: Find EXE
+        id: find_exe
+        run: |
+          $exe = Get-ChildItem ./publish/*.exe | Select-Object -First 1
+          echo "exe_path=$($exe.FullName)" >> $env:GITHUB_OUTPUT
+
+      - name: Create GitHub Release with changelog
         uses: softprops/action-gh-release@v2
         with:
-          files: publish/*.exe
+          tag_name: ${{ github.ref_name }}
+          files: ${{ steps.find_exe.outputs.exe_path }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
