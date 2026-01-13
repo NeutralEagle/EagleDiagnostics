@@ -145,6 +145,7 @@ namespace EagleDiagnostics
 
             if (catalanToolStripMenuItem.Checked) MyIni.Write("CAT", "1", "LanguageList");
             if (chineseToolStripMenuItem.Checked) MyIni.Write("CHS", "1", "LanguageList");
+            if (germanToolStripMenuItem.Checked) MyIni.Write("DEU", "1", "LanguageList");
             if (czechToolStripMenuItem.Checked) MyIni.Write("CSY", "1", "LanguageList");
             if (englishToolStripMenuItem.Checked) MyIni.Write("ENG", "1", "LanguageList");
             if (englishUSToolStripMenuItem.Checked) MyIni.Write("ENU", "1", "LanguageList");
@@ -219,6 +220,7 @@ namespace EagleDiagnostics
 
                 if (MyIni.Read("CAT", "LanguageList") == "1") catalanToolStripMenuItem.Checked = true;
                 if (MyIni.Read("CHS", "LanguageList") == "1") chineseToolStripMenuItem.Checked = true;
+                if (MyIni.Read("DEU", "LanguageList") == "1") germanToolStripMenuItem.Checked = true;
                 if (MyIni.Read("CSY", "LanguageList") == "1") czechToolStripMenuItem.Checked = true;
                 if (MyIni.Read("ENG", "LanguageList") == "1") englishToolStripMenuItem.Checked = true;
                 if (MyIni.Read("ENU", "LanguageList") == "1") englishUSToolStripMenuItem.Checked = true;
@@ -723,7 +725,7 @@ namespace EagleDiagnostics
                     if (ver > max)
                     {
                         DialogResult result = MessageBox.Show($"New {comboReleaseType.Text} version is available, press OK to download.", "New version!", MessageBoxButtons.OKCancel);
-                        if (result == DialogResult.OK) _ = DownloadAsync(downloadUrl);
+                        if (result == DialogResult.OK && downloadUrl != null) _ = DownloadAsync(downloadUrl);
                     }
                     else
                         MessageBox.Show($"You already have the latest {comboReleaseType.Text} version or newer: Need:{ver}/Have:{max}");
