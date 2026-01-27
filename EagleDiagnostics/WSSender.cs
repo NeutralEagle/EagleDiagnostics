@@ -1,34 +1,39 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Net.Http;
+﻿using System.Net;
 using System.Net.Http.Headers;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using System.Xml;
+using System.Linq;
 
 namespace EagleDiagnostics
 {
     public partial class WSSender : Form
     {
-        public static string finalHost = "";
-        public static string finalUrl = "";
-        public static string deviceSN = "";
-        public static string msSN = "";
-        public static string httpPrefix = "https://";
-        static string login;
+        // Backing fields made non-public to satisfy CA2211 (non-constant fields should not be visible)
+        private static string finalHost = "";
+        private static string finalUrl = "";
+        private static string deviceSN = "";
+        private static string msSN = "";
+        private static string httpPrefix = "https://";
+        private static string login = string.Empty;
 
-        Dictionary<string, string> shellVarValuePairs = new Dictionary<string, string>();
+        // Public properties replace the previously public mutable fields
+        public static string FinalHost { get => finalHost; set => finalHost = value; }
+        public static string FinalUrl { get => finalUrl; set => finalUrl = value; }
+        public static string DeviceSN { get => deviceSN; set => deviceSN = value; }
+        public static string MsSN { get => msSN; set => msSN = value; }
+        public static string HttpPrefix { get => httpPrefix; set => httpPrefix = value; }
+        public static string Login { get => login; set => login = value; }
+
+        readonly Dictionary<string, string> shellVarValuePairs = new();
+
         public WSSender()
         {
             InitializeComponent();
-            logger.TextChanged += logger_TextChanged;
+            logger.TextChanged += Logger_TextChanged;
         }
 
-        private bool checkSN(string input)
+        private static bool CheckSN(string input)
         {
             msSN = Regex.Replace(input, "[^a-fA-F0-9]", "").ToUpper();
             /*if (msSN.Length == 12 && (msSN.StartsWith("EEE000")|| msSN.StartsWith("504F94")))
@@ -60,7 +65,8 @@ namespace EagleDiagnostics
 
 
             string initialUrl = $"{httpPrefix}dns.loxonecloud.com/{msSN}";
-            string url = await GetRedirectedUrlAsync(initialUrl, login);
+            // Await a nullable string result
+            string? url = await GetRedirectedUrlAsync(initialUrl, login);
             if (url != null)
             {
                 finalHost = GetHostFromUrl(url);
@@ -70,9 +76,9 @@ namespace EagleDiagnostics
 
 
         }
-        private async void button1_Click(object sender, EventArgs e)
+        private async void Button1_Click(object sender, EventArgs e)
         {
-            if (checkSN(msTextBox.Text) == false)
+            if (CheckSN(msTextBox.Text) == false)
             {
                 MessageBox.Show("Invalid MS Serial number");
                 return;
@@ -94,7 +100,7 @@ namespace EagleDiagnostics
                 {
                     // Now you have the list of ShellVars, you can work with it as needed
                     panel.Controls.Clear();
-                    CreateTable(shellVars, panel, logger);
+                    await CreateTable(shellVars, panel, logger);
                 }
                 else
                 {
@@ -113,13 +119,13 @@ namespace EagleDiagnostics
             int x = 10;
             foreach (string shellVar in shellVars)
             {
-                Label label = new Label()
+                Label label = new()
                 {
                     Text = shellVar,
                     Location = new Point(x, y)
                 };
                 string url = $"{httpPrefix}{finalHost}/dev/sys/wsdevice/{deviceSN}/get/{shellVar}";
-                TextBox textBox = new TextBox()
+                TextBox textBox = new()
                 {
 
                     Text = $"{SendWebServiceRequest(url, login, logger)}",
@@ -135,11 +141,11 @@ namespace EagleDiagnostics
 
             }
         }
-        public string GetHostFromUrl(string url)
+        public static string GetHostFromUrl(string url)
         {
             try
             {
-                Uri uri = new Uri(url);
+                Uri uri = new(url);
                 return uri.Host + ":" + uri.Port;
             }
             catch (UriFormatException ex)
@@ -149,71 +155,70 @@ namespace EagleDiagnostics
         }
         public static string SendWebServiceRequest(string url, string accessToken, Control logger)
         {
-            using (HttpClient client = new HttpClient())
+            using var client = new HttpClient();
+            // Set the Authorization header
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", accessToken);
+            logger.Text += "Sending request: " + url + "\r\n";
+
+            HttpResponseMessage response = client.GetAsync(url).Result; // Synchronous call
+            logger.Text += response.StatusCode + "\r\n";
+
+            if (response.IsSuccessStatusCode)
             {
-                // Set the Authorization header
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", accessToken);
-                logger.Text += "Sending request: " + url + "\r\n";
+                string xmlContent = response.Content.ReadAsStringAsync().Result; // Synchronous read of response content
+                logger.Text += xmlContent;
+                XmlDocument xmlDoc = new();
 
-                HttpResponseMessage response = client.GetAsync(url).Result; // Synchronous call
-                logger.Text += response.StatusCode + "\r\n";
+                xmlDoc.LoadXml(xmlContent);
 
-                if (response.IsSuccessStatusCode)
+                XmlNode? valueNode = xmlDoc.SelectSingleNode("//LL[@value]");
+                // Use null‑propagating operators and a local variable to avoid possible null dereference
+                var valueAttr = valueNode?.Attributes?["value"];
+                if (valueAttr != null)
                 {
-                    string xmlContent = response.Content.ReadAsStringAsync().Result; // Synchronous read of response content
-                    logger.Text += xmlContent;
-                    XmlDocument xmlDoc = new XmlDocument();
-                    xmlDoc.LoadXml(xmlContent);
-
-                    XmlNode valueNode = xmlDoc.SelectSingleNode("//LL[@value]");
-                    if (valueNode != null && valueNode.Attributes["value"] != null)
-                    {
-                        return valueNode.Attributes["value"].Value.Trim();
-                    }
-                    else
-                    {
-                        throw new Exception("XML response does not contain a value attribute.");
-                    }
+                    return valueAttr.Value.Trim();
                 }
                 else
                 {
-                    throw new Exception($"Failed to send web service request. Status Code: {response.StatusCode}");
+                    throw new Exception("XML response does not contain a value attribute.");
                 }
+            }
+            else
+            {
+                throw new Exception($"Failed to send web service request. Status Code: {response.StatusCode}");
             }
         }
 
-        static async Task<string> GetRedirectedUrlAsync(string initialUrl, string accessToken)
+        static async Task<string?> GetRedirectedUrlAsync(string initialUrl, string accessToken)
         {
-            using (HttpClient client = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false }))
+            using var client = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false });
+
+            // Use the provided access token to set the Authorization header when available.
+            if (!string.IsNullOrEmpty(accessToken))
             {
-
-                // Set the Authorization header
-                //client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", accessToken);
-
-                HttpResponseMessage response = await client.GetAsync(initialUrl);
-
-                if (response.StatusCode == HttpStatusCode.RedirectKeepVerb)
-                {
-                    // Retrieve the redirection URL from the Location header
-                    string finalUrl = response.Headers.Location.OriginalString;
-                    return finalUrl;
-                }
-
-                return null; // Return null if there is no redirection
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", accessToken);
             }
+
+            HttpResponseMessage response = await client.GetAsync(initialUrl);
+
+            // Ensure there's a Location header to return (redirect target).
+            if (response.Headers.Location != null)
+            {
+                return response.Headers.Location.OriginalString;
+            }
+
+            return null; // nullable return permitted by signature
         }
 
         static async Task<string> GetXmlDataAsync(string url, string accessToken)
         {
-            using (HttpClient client = new HttpClient())
-            {
-                // Set the Authorization header
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", accessToken);
+            using var client = new HttpClient();
+            // Set the Authorization header
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", accessToken);
 
-                string xmlContent = await client.GetStringAsync(url);
+            string xmlContent = await client.GetStringAsync(url);
 
-                return xmlContent;
-            }
+            return xmlContent;
         }
 
         public static string EncodeToBase64(string user, string password)
@@ -232,20 +237,27 @@ namespace EagleDiagnostics
 
         static List<string> ParseXmlData(string xmlData)
         {
-            List<string> shellVars = new List<string>();
+            List<string> shellVars = new();
+
+            // Guard against null/empty input
+            if (string.IsNullOrWhiteSpace(xmlData))
+                return shellVars;
 
             try
             {
-                XmlDocument xmlDoc = new XmlDocument();
+                XmlDocument xmlDoc = new();
                 xmlDoc.LoadXml(xmlData);
 
                 XmlNodeList llNodes = xmlDoc.GetElementsByTagName("LL");
 
                 foreach (XmlNode llNode in llNodes)
                 {
-                    if (llNode.Attributes["value"] != null)
+                    // XmlNode.Attributes can be null; check it first and then the "value" attribute
+                    var attrs = llNode.Attributes;
+                    var valueAttr = attrs?["value"];
+                    if (valueAttr != null)
                     {
-                        string[] varNames = llNode.Attributes["value"].Value.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                        string[] varNames = valueAttr.Value.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
                         foreach (string varName in varNames)
                         {
@@ -277,12 +289,12 @@ namespace EagleDiagnostics
                     // Check if this control is a Label (represents a ShellVar)
                     string shellVar = label.Text;
 
-                    // Find the corresponding TextBox control
-                    Control textBoxControl = panel.Controls
+                    // Find the corresponding TextBox control (nullable)
+                    TextBox? textBox = panel.Controls
                         .OfType<TextBox>()
-                        .FirstOrDefault(textBox => textBox.Location.X == label.Location.X + label.Width + 20 && textBox.Location.Y == label.Location.Y);
+                        .FirstOrDefault(tb => tb.Location.X == label.Location.X + label.Width + 20 && tb.Location.Y == label.Location.Y);
 
-                    if (textBoxControl is TextBox textBox)
+                    if (textBox != null)
                     {
                         // Update the value pair in the dictionary
                         string value = textBox.Text;
@@ -315,12 +327,12 @@ namespace EagleDiagnostics
                 }
         }
 
-        private void btnReboot_Click(object sender, EventArgs e)
+        private async void BtnReboot_Click(object sender, EventArgs e)
         {
-            CheckFinalURL();
+            await CheckFinalURL();
             SendWebServiceRequest($"{httpPrefix}{finalHost}/dev/sys/wsdevice/{deviceSN}/Reboot", login, logger);
         }
-        private void logger_TextChanged(object sender, EventArgs e)
+        private void Logger_TextChanged(object? sender, EventArgs e)
         {
             // set the current caret position to the end
             logger.SelectionStart = logger.Text.Length;
@@ -328,9 +340,9 @@ namespace EagleDiagnostics
             logger.ScrollToCaret();
         }
 
-        private void nfcPlotBtn_Click(object sender, EventArgs e)
+        private async void NfcPlotBtn_Click(object sender, EventArgs e)
         {
-            CheckFinalURL();
+            await CheckFinalURL();
             Form b = new NFCPlot($"{httpPrefix}{finalHost}", deviceSN, userTextBox.Text, pwTextBox.Text);
             b.Show();
         }

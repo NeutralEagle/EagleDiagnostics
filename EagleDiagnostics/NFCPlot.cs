@@ -1,13 +1,6 @@
-﻿using System;
-using System.Windows.Forms;
+﻿using System.Diagnostics;
 using System.Net;
-using System.IO;
-using System.Collections.Generic;
-using System.Threading;
-using System.Linq;
-using System.Drawing;
 using ZedGraph;
-using System.Diagnostics;
 
 namespace EagleDiagnostics
 {
@@ -21,7 +14,7 @@ namespace EagleDiagnostics
         private const double tSleep = 0.25;
         private static string username = "";
         private static string password = "";
-        private static Color[] colorList = {Color.Aqua,Color.Green,Color.Blue,Color.Purple,Color.Red,Color.Orange,Color.Navy};
+        private static Color[] colorList = { Color.Aqua, Color.Green, Color.Blue, Color.Purple, Color.Red, Color.Orange, Color.Navy };
 
         private ZedGraphControl zedGraphControl;
 
@@ -51,7 +44,7 @@ namespace EagleDiagnostics
             int x = 0;
             foreach (var key in regVal.Keys)
             {
-                
+
                 LineItem curve = myPane.AddCurve(key, new PointPairList(), colorList[x], SymbolType.None);
                 curve.Line.IsSmooth = false;
                 x++;
@@ -87,7 +80,7 @@ namespace EagleDiagnostics
         {
             string response = await RequestWebService("/dev/sys/wsdevice/" + devName + "/IQS626ReadAllValues");
             timeVec.Add(DateTime.Now);
-            
+
             List<string> regKeys = new List<string>
         {
             "Reg0x02",
@@ -184,7 +177,7 @@ namespace EagleDiagnostics
 
             return result.ToArray();
         }
-    
+
 
 
 

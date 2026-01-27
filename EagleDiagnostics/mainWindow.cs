@@ -1,20 +1,13 @@
-using System.Reflection;
-
-
-
 namespace EagleDiagnostics
 {
-    using System.IO;
-    using System.Diagnostics;
-    using System.Xml;
-    using System.Text;
-    using MyProg;
-    using System.Threading.Tasks;
     using EagleDiagnostics.Properties;
-    using System.Windows.Forms;
     using System;
-    using System.Text.Json;
-    using System.Xml.Linq;
+    using System.Diagnostics;
+    using System.IO;
+    using System.Text;
+    using System.Threading.Tasks;
+    using System.Windows.Forms;
+    using System.Xml;
 
     public partial class MainWindow : Form
     {

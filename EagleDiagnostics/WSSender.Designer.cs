@@ -90,7 +90,7 @@
             btnGetvar.TabIndex = 4;
             btnGetvar.Text = "getvar";
             btnGetvar.UseVisualStyleBackColor = true;
-            btnGetvar.Click += button1_Click;
+            btnGetvar.Click += Button1_Click;
             // 
             // rBSet
             // 
@@ -136,7 +136,7 @@
             btnReboot.TabIndex = 8;
             btnReboot.Text = "Device Reboot";
             btnReboot.UseVisualStyleBackColor = true;
-            btnReboot.Click += btnReboot_Click;
+            btnReboot.Click += BtnReboot_Click;
             // 
             // btnSend
             // 

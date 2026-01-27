@@ -1,7 +1,7 @@
 ﻿using System.Data;
-using System.Text;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using System.Text.RegularExpressions;
 
 
@@ -76,16 +76,16 @@ namespace EagleDiagnostics
                 }
             }
             IPEndPoint iPEndPoint = new(IPAddress.Any, Port);
-            
+
             while (!formClosing)
             {
                 try
                 {
-                        if (!loadFlag&&udpClient is not null) FillData(udpClient.Receive(ref iPEndPoint), true,true);
-                    
+                    if (!loadFlag && udpClient is not null) FillData(udpClient.Receive(ref iPEndPoint), true, true);
+
                 }
                 catch { }
-                
+
             }
             UDPActive = false;
         }
@@ -159,12 +159,12 @@ namespace EagleDiagnostics
             {
                 int indexOfNull;
                 int indexOfDataEnd = 0;
-                
+
                 if (data[2] == '\xa0') return;//NYI - unknown message
                 if (data[2] == '\xa4') return;//NYI - unknown message
                 if (data[2] == '\x14') return;//NYI - unknown message
                 if (data[2] == '\x9c') return;//NYI - unknown message
-                
+
 
                 data = data.Skip(2).Take(data.Length - 4).ToArray();
                 int dataLen = data.Length;
@@ -189,39 +189,40 @@ namespace EagleDiagnostics
                                 indexOfDataEnd = FindPattern(data, pattern, headerEnd);
                             else
                                 indexOfDataEnd = dataLen;
-                            if (indexOfDataEnd != -1) { 
-                            string str = Encoding.UTF8.GetString(data, headerEnd + 1, (dataLen - headerEnd) - (dataLen - indexOfDataEnd) - 1);
-
-                            string header = Encoding.UTF8.GetString(data, 27, headerEnd - 26);
-                            str = Regex.Replace(str, regexPattern, "\r\n");
-                            indexOfNull = str.IndexOf("\\0\\u001f\\x001f");
-
-
-                            /*
-                        StringBuilder sb = new StringBuilder();
-                        foreach (var a in data.Take(8).ToArray())
-                        {
-                            sb.Append(a.ToString().PadLeft(3, '0') + ", ");
-
-                        }
-                        string bytes0_8 = sb.ToString();*/
-                            int messageNr = BitConverter.ToUInt16(data, 6);
-                            /*
-                            sb.Clear();
-                            foreach (var b in data.Skip(17).Take(6).ToArray())
+                            if (indexOfDataEnd != -1)
                             {
-                                sb.Append(b.ToString().PadLeft(3, '0') + ", ");
+                                string str = Encoding.UTF8.GetString(data, headerEnd + 1, (dataLen - headerEnd) - (dataLen - indexOfDataEnd) - 1);
+
+                                string header = Encoding.UTF8.GetString(data, 27, headerEnd - 26);
+                                str = Regex.Replace(str, regexPattern, "\r\n");
+                                indexOfNull = str.IndexOf("\\0\\u001f\\x001f");
+
+
+                                /*
+                            StringBuilder sb = new StringBuilder();
+                            foreach (var a in data.Take(8).ToArray())
+                            {
+                                sb.Append(a.ToString().PadLeft(3, '0') + ", ");
 
                             }
-                            string bytes18_23 = sb.ToString();
-                            */
+                            string bytes0_8 = sb.ToString();*/
+                                int messageNr = BitConverter.ToUInt16(data, 6);
+                                /*
+                                sb.Clear();
+                                foreach (var b in data.Skip(17).Take(6).ToArray())
+                                {
+                                    sb.Append(b.ToString().PadLeft(3, '0') + ", ");
 
-                            //Invoke((MethodInvoker)(() => mainListBox.Items.Add($"{bytes0_8}{messageNr.ToString().PadLeft(5, '0')}   {LoxTimeStampToDateTime(time)}.{millisec.ToString().PadLeft(3, '0')};    {IP}    {bytes18_23}        {header} {str}")));
-                            if (formClosing)
-                                return;
-                            Invoke((MethodInvoker)(() => mainListBox.Items.Add($"{messageNr.ToString().PadLeft(6, '0')}  {LoxTimeStampToDateTime(time)}.{millisec.ToString().PadLeft(3, '0')};  {IP,-16}{header}{str}")));
+                                }
+                                string bytes18_23 = sb.ToString();
+                                */
 
-                            if (refreshFlag == true) Invoke((MethodInvoker)(() => mainListBox.TopIndex = mainListBox.Items.Count - 1));
+                                //Invoke((MethodInvoker)(() => mainListBox.Items.Add($"{bytes0_8}{messageNr.ToString().PadLeft(5, '0')}   {LoxTimeStampToDateTime(time)}.{millisec.ToString().PadLeft(3, '0')};    {IP}    {bytes18_23}        {header} {str}")));
+                                if (formClosing)
+                                    return;
+                                Invoke((MethodInvoker)(() => mainListBox.Items.Add($"{messageNr.ToString().PadLeft(6, '0')}  {LoxTimeStampToDateTime(time)}.{millisec.ToString().PadLeft(3, '0')};  {IP,-16}{header}{str}")));
+
+                                if (refreshFlag == true) Invoke((MethodInvoker)(() => mainListBox.TopIndex = mainListBox.Items.Count - 1));
                             }
                         }
                     }
@@ -369,7 +370,7 @@ namespace EagleDiagnostics
                         {
                             byte[] messageBytes = messageStream.ToArray();
                             string debugBytes = Encoding.UTF8.GetString(messageBytes);
-                            FillData(messageBytes, true,false);
+                            FillData(messageBytes, true, false);
 
                             insideMessage = false;
                             messageStream = new MemoryStream();
@@ -382,7 +383,7 @@ namespace EagleDiagnostics
             }
             else
             {
-                FillData(monitorFile, false,false);
+                FillData(monitorFile, false, false);
             }
         }
 

@@ -3,33 +3,47 @@ using System.Runtime.InteropServices;
 using System.Text;
 
 // Change this to match your program's normal namespace
-namespace MyProg
+namespace EagleDiagnostics
 {
     class IniFile   // revision 11
     {
         readonly string Path;
-#pragma warning disable CS8601 // Může jít o přiřazení s odkazem null.
-        readonly string EXE = Assembly.GetExecutingAssembly().GetName().Name;
-#pragma warning restore CS8601 // Může jít o přiřazení s odkazem null.
+        readonly string EXE = Assembly.GetExecutingAssembly().GetName().Name ?? "";
 
-        [DllImport("kernel32", CharSet = CharSet.Unicode)]
-        static extern long WritePrivateProfileString(string Section, string? Key, string? Value, string FilePath);
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
+        static extern long WritePrivateProfileString(
+            string Section,
+            string? Key,
+            string? Value,
+            string FilePath);
 
-        [DllImport("kernel32", CharSet = CharSet.Unicode)]
-        static extern int GetPrivateProfileString(string Section, string Key, string Default, StringBuilder RetVal, int Size, string FilePath);
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
+        static extern int GetPrivateProfileString(
+            string Section,
+            string Key,
+            string Default,
+            StringBuilder RetVal,
+            int Size,
+            string FilePath);
 
-#pragma warning disable CA2101 // Zadání zařazení pro argumenty řetězce P/Invoke
-        [DllImport("kernel32")]
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
+        static extern int GetPrivateProfileString(
+            string Section,
+            int Key,
+            string Default,
+            byte[] Result,
+            int Size,
+            string FilePath);
 
-        static extern int GetPrivateProfileString(string Section, int Key,
-               string Value, [MarshalAs(UnmanagedType.LPArray)] byte[] Result,
-               int Size, string FileName);
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
+        static extern int GetPrivateProfileString(
+            int Section,
+            string Key,
+            string Default,
+            byte[] Result,
+            int Size,
+            string FilePath);
 
-        [DllImport("kernel32")]
-        static extern int GetPrivateProfileString(int Section, string Key,
-               string Value, [MarshalAs(UnmanagedType.LPArray)] byte[] Result,
-               int Size, string FileName);
-#pragma warning restore CA2101 // Zadání zařazení pro argumenty řetězce P/Invoke
         public IniFile(string? IniPath = null)
         {
             Path = new FileInfo(IniPath ?? EXE + ".ini").FullName;
@@ -64,32 +78,27 @@ namespace MyProg
 
         public string[] GetEntryNames(string section)
         {
-            //    Sets the maxsize buffer to 500, if the more
-            //    is required then doubles the size each time. 
             for (int maxsize = 500; true; maxsize *= 2)
             {
-                //    Obtains the EntryKey information in bytes
-                //    and stores them in the maxsize buffer (Bytes array).
-                //    Note that the SectionHeader value has been passed.
                 byte[] bytes = new byte[maxsize];
-                int size = GetPrivateProfileString(section, 0, "", bytes, maxsize, Path);
 
-                // Check the information obtained is not bigger
-                // than the allocated maxsize buffer - 2 bytes.
-                // if it is, then skip over the next section
-                // so that the maxsize buffer can be doubled.
-                if (size < maxsize - 2)
+                int sizeChars = GetPrivateProfileString(section, 0, "", bytes, maxsize, Path);
+
+                // If buffer was too small, Win32 returns maxsize - 2 (chars) for this form
+                if (sizeChars < maxsize - 2)
                 {
-                    // Converts the bytes value into an ASCII char.
-                    // This is one long string.
-                    string entries = Encoding.ASCII.GetString(bytes, 0,
-                                              size - (size > 0 ? 1 : 0));
-                    // Splits the Long string into an array based on the "\0"
-                    // or null (Newline) value and returns the value(s) in an array
-                    return entries.Split(new char[] { '\0' });
+                    // sizeChars is number of characters copied (excluding final terminator)
+                    // Convert chars -> bytes (UTF-16)
+                    int byteCount = sizeChars * 2;
+
+                    string entries = Encoding.Unicode.GetString(bytes, 0, byteCount);
+
+                    // entries is NUL-separated, and ends with an extra NUL
+                    return entries.Split('\0', StringSplitOptions.RemoveEmptyEntries);
                 }
             }
         }
+
     }
 }
 
