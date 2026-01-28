@@ -181,8 +181,9 @@ try {
     if ($parts.Count -ge 5) {
       $last = $parts[$parts.Count - 1]
       $n = 0
-      if ([int]::TryParse($last, [ref]$n)) {
-        if ($n -gt $maxBuild) { $maxBuild = $n }
+      if ($last -match '^\d+$') {
+        $n = $last -as [int]
+        if ($null -ne $n -and $n -gt $maxBuild) { $maxBuild = $n }
       }
     }
   }
