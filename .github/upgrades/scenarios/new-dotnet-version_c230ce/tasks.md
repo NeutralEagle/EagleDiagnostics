@@ -4,7 +4,7 @@
 
 This document lists executable tasks to upgrade the `EagleDiagnostics` solution from `net6.0-windows` to `net10.0-windows`. Tasks implement the plan's prerequisites checks, the coordinated project/package upgrade and compilation fixes, automated validation per the plan, and the final commit.
 
-**Progress**: 2/4 tasks complete (50%) ![0%](https://progress-bar.xyz/50)
+**Progress**: 3/4 tasks complete (75%) ![0%](https://progress-bar.xyz/75)
 
 ---
 
@@ -37,10 +37,12 @@ This document lists executable tasks to upgrade the `EagleDiagnostics` solution 
 - [⊘] (1) Confirm Plan §Testing Strategy lists test projects; Plan reports no test projects discovered. Since no test projects are listed in the plan, skip automated test execution (**Verify**)
 - [⊘] (2) If test projects are later added to the plan, run those test projects, fix any failures, re-run tests, and ensure all tests pass with 0 failures per Plan §Testing Strategy (**Verify**)
 
-### [▶] TASK-004: Final commit
+### [✓] TASK-004: Final commit *(Completed: 2026-01-28 07:50)*
 **References**: Plan §Source Control Strategy
 
-- [▶] (1) Commit all upgrade changes (project file edits, package updates, compilation fixes) with message: "TASK-004: Complete upgrade to `net10.0-windows`"
+- [✓] (1) Commit all upgrade changes (project file edits, package updates, compilation fixes) with message: "TASK-004: Complete upgrade to `net10.0-windows`"
+
+
 
 
 

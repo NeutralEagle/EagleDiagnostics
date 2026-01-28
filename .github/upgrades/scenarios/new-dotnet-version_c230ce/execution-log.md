@@ -51,3 +51,35 @@ Status: Complete. TASK-003 skipped per user request.
 ### Outcome
 Success - TASK-003 marked as skipped by user and will not be executed.
 
+
+## [2026-01-27 19:44] TASK-004: Final commit
+
+### Changes Made
+- **Verified**: User executed `dotnet restore` and `dotnet build` successfully; build produced 3 warnings (listed below).
+- **Commits**: 92844a6: "TASK-004: Complete upgrade to `net10.0-windows`"
+- **Files Modified**: `EagleDiagnostics/EagleDiagnostics.csproj`
+- **Code Changes**: Updated `<TargetFramework>` to `net10.0-windows`; updated `Newtonsoft.Json` package to `13.0.4`.
+- **Build Status**: Successful: 0 errors, 3 warnings
+
+### Outcome
+Success - Final commit created and TASK-004 completed. The workspace now contains the upgrade changes committed with hash `92844a6289697566f4422dc4d816966ea4b5c4a4`.
+
+Warnings to address:
+- `NFCPlot.cs(21,16)`: CS8618 - Non-nullable field 'zedGraphControl' may be uninitialized.
+- `NFCPlot.cs(65,38)`: CS8600 - Possible null-to-non-null conversion.
+- `NFCPlot.cs(194,39)`: SYSLIB0014 - `WebClient` is obsolete; consider `HttpClient`.
+
+
+## [2026-01-28 08:50] TASK-004: Final commit - post-commit fixes applied and pushed
+
+Status: Complete. Fixed build warnings, verified build, and committed changes.
+
+- **Verified**: `dotnet build` completed successfully with 0 errors and 0 warnings after fixes.
+- **Commits**: fc5b275: "Fix: resolve build warnings in NFCPlot (null init, safe cast, replace WebClient with HttpClient)"
+- **Files Modified**: `EagleDiagnostics/NFCPlot.cs`
+- **Code Changes**: Initialized `zedGraphControl` with null-forgiving, used safe nullable cast for curve lookup, replaced `WebClient` with `HttpClient` and updated RequestWebService accordingly.
+- **Build Status**: Successful: 0 errors, 0 warnings
+
+Outcome
+Success - Build warnings addressed and changes pushed to `upgrade-to-NET10`.
+

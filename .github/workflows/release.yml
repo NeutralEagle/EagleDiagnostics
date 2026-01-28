@@ -16,10 +16,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 6.0.x
+    name: Setup .NET SDK
+    uses: actions/setup-dotnet@v4
+    with:
+      dotnet-version: 10.0.x
+
 
       - name: Restore (win-x64)
         run: dotnet restore .\EagleDiagnostics\EagleDiagnostics.csproj -r win-x64

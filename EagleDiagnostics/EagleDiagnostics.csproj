@@ -1,5 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <InformationalVersion>v0.26.1.28.0</InformationalVersion>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
@@ -7,9 +8,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationIcon>Resources\LogoEagle.ico</ApplicationIcon>
 	<ProductVersion>0.8.18</ProductVersion>
-	<AssemblyVersion>1.1.23.24</AssemblyVersion>
-	<FileVersion>1.1.23.24</FileVersion>
-	<Version>1.10.0-alpha-63</Version>
+	<AssemblyVersion>26.1.28.0</AssemblyVersion>
+	<FileVersion>26.1.28.0</FileVersion>
+	<Version>26.1.28.0</Version>
 	<StartupObject></StartupObject>
 	<PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
@@ -66,3 +67,9 @@
   </ItemGroup>
 
 </Project>
+
+
+
+
+
+

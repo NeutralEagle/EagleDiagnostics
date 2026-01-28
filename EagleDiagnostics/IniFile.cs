@@ -2,153 +2,103 @@
 using System.Runtime.InteropServices;
 using System.Text;
 
-// Change this to match your program's normal namespace
 namespace EagleDiagnostics
 {
-    class IniFile   // revision 11
+    class IniFile   // revision 12 (NET10-safe P/Invoke)
     {
-        readonly string Path;
-        readonly string EXE = Assembly.GetExecutingAssembly().GetName().Name ?? "";
+        private readonly string Path;
+        private readonly string EXE = Assembly.GetExecutingAssembly().GetName().Name ?? "";
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
-        static extern long WritePrivateProfileString(
-            string Section,
-            string? Key,
-            string? Value,
-            string FilePath);
+        // NOTE:
+        // - Use the explicit W (Unicode) entry points.
+        // - nSize is in CHARACTERS (UTF-16), not bytes.
+        // - Keep separate overloads for single-value reads (StringBuilder) and multi-strings (char[]).
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
-        static extern int GetPrivateProfileString(
-            string Section,
-            string Key,
-            string Default,
-            StringBuilder RetVal,
-            int Size,
-            string FilePath);
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true,
+            EntryPoint = "WritePrivateProfileStringW")]
+        private static extern bool WritePrivateProfileString(
+            string lpAppName,
+            string? lpKeyName,
+            string? lpString,
+            string lpFileName);
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
-        static extern int GetPrivateProfileString(
-            string Section,
-            int Key,
-            string Default,
-            byte[] Result,
-            int Size,
-            string FilePath);
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true,
+            EntryPoint = "GetPrivateProfileStringW")]
+        private static extern int GetPrivateProfileString(
+            string lpAppName,
+            string lpKeyName,
+            string lpDefault,
+            StringBuilder lpReturnedString,
+            int nSize,
+            string lpFileName);
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
-        static extern int GetPrivateProfileString(
-            int Section,
-            string Key,
-            string Default,
-            byte[] Result,
-            int Size,
-            string FilePath);
+        // Passing lpKeyName = null returns all key names in the section (NUL-separated list)
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true,
+            EntryPoint = "GetPrivateProfileStringW")]
+        private static extern int GetPrivateProfileString(
+            string lpAppName,
+            string? lpKeyName,
+            string lpDefault,
+            [Out] char[] lpReturnedString,
+            int nSize,
+            string lpFileName);
 
-        public IniFile(string? IniPath = null)
+        public IniFile(string? iniPath = null)
         {
-            Path = new FileInfo(IniPath ?? EXE + ".ini").FullName;
+            // Optional: guard if you might run on non-Windows
+            if (!OperatingSystem.IsWindows())
+                throw new PlatformNotSupportedException("IniFile uses Win32 INI APIs (kernel32) and requires Windows.");
+
+            Path = new FileInfo(iniPath ?? (EXE + ".ini")).FullName;
         }
 
-        public string Read(string Key, string? Section = null)
+        public string Read(string key, string? section = null)
         {
-            var RetVal = new StringBuilder(255);
-            _ = GetPrivateProfileString(Section ?? EXE, Key, "", RetVal, 255, Path);
-            return RetVal.ToString();
+            // If you expect long values, you can grow this buffer similarly to GetEntryNames.
+            var retVal = new StringBuilder(255);
+            _ = GetPrivateProfileString(section ?? EXE, key, "", retVal, retVal.Capacity, Path);
+            return retVal.ToString();
         }
 
-        public void Write(string? Key, string? Value, string? Section = null)
+        public void Write(string? key, string? value, string? section = null)
         {
-            WritePrivateProfileString(Section ?? EXE, Key, Value, Path);
+            _ = WritePrivateProfileString(section ?? EXE, key, value, Path);
         }
 
-        public void DeleteKey(string Key, string? Section = null)
+        public void DeleteKey(string key, string? section = null)
         {
-            Write(Key, null, Section ?? EXE);
+            Write(key, null, section ?? EXE);
         }
 
-        public void DeleteSection(string? Section = null)
+        public void DeleteSection(string? section = null)
         {
-            Write(null, null, Section ?? EXE);
+            Write(null, null, section ?? EXE);
         }
 
-        public bool KeyExists(string Key, string? Section = null)
+        public bool KeyExists(string key, string? section = null)
         {
-            return Read(Key, Section).Length > 0;
+            return Read(key, section).Length > 0;
         }
 
+        /// <summary>
+        /// Returns all key names in a section (does not return values).
+        /// </summary>
         public string[] GetEntryNames(string section)
         {
-            for (int maxsize = 500; true; maxsize *= 2)
+            for (int maxChars = 512; ; maxChars *= 2)
             {
-                byte[] bytes = new byte[maxsize];
+                var buffer = new char[maxChars];
 
-                int sizeChars = GetPrivateProfileString(section, 0, "", bytes, maxsize, Path);
+                // lpKeyName = null => return all key names in the section as NUL-separated strings
+                int copied = GetPrivateProfileString(section, null, "", buffer, buffer.Length, Path);
 
-                // If buffer was too small, Win32 returns maxsize - 2 (chars) for this form
-                if (sizeChars < maxsize - 2)
+                // If buffer was too small, Win32 typically returns maxChars - 2 for this multi-string form.
+                if (copied < maxChars - 2)
                 {
-                    // sizeChars is number of characters copied (excluding final terminator)
-                    // Convert chars -> bytes (UTF-16)
-                    int byteCount = sizeChars * 2;
-
-                    string entries = Encoding.Unicode.GetString(bytes, 0, byteCount);
-
-                    // entries is NUL-separated, and ends with an extra NUL
+                    string entries = new string(buffer, 0, copied);
                     return entries.Split('\0', StringSplitOptions.RemoveEmptyEntries);
                 }
             }
         }
-
     }
 }
-
-#region howToUse
-/*
-Open the INI file in one of the 3 following ways:
-    // Creates or loads an INI file in the same directory as your executable
-    // named EXE.ini (where EXE is the name of your executable)
-    var MyIni = new IniFile();
-
-    // Or specify a specific name in the current dir
-    var MyIni = new IniFile("Settings.ini");
-
-    // Or specify a specific name in a specific dir
-    var MyIni = new IniFile(@"C:\Settings.ini");
-
-You can write some values like so:
-    MyIni.Write("DefaultVolume", "100");
-    MyIni.Write("HomePage", "http://www.google.com");
-
-To create a file like this:
-    [MyProg]
-    DefaultVolume = 100
-    HomePage = http://www.google.com
-
-To read the values out of the INI file:
-    var DefaultVolume = MyIni.Read("DefaultVolume");
-    var HomePage = MyIni.Read("HomePage");
-
-Optionally, you can set [Section] 's:
-    MyIni.Write("DefaultVolume", "100", "Audio");
-    MyIni.Write("HomePage", "http://www.google.com", "Web");
-
-To create a file like this:
-    [Audio]
-    DefaultVolume = 100
-
-    [Web]
-    HomePage = http://www.google.com
-
-You can also check for the existence of a key like so:
-    if (!MyIni.KeyExists("DefaultVolume", "Audio"))
-    {
-        MyIni.Write("DefaultVolume", "100", "Audio");
-    }
-
-You can delete a key like so:
-    MyIni.DeleteKey("DefaultVolume", "Audio");
-
-You can also delete a whole section (including all keys) like so:
-    MyIni.DeleteSection("Web");
-*/
-#endregion
