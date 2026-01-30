@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Net;
 using ZedGraph;
+using System.Net.Http;
 
 namespace EagleDiagnostics
 {
@@ -16,7 +17,8 @@ namespace EagleDiagnostics
         private static string password = "";
         private static Color[] colorList = { Color.Aqua, Color.Green, Color.Blue, Color.Purple, Color.Red, Color.Orange, Color.Navy };
 
-        private ZedGraphControl zedGraphControl;
+        // Initialize with null-forgiving to satisfy the compiler: it will be assigned in InitializeChart()
+        private ZedGraphControl zedGraphControl = null!;
 
         public NFCPlot(string urlParam, string devNameParam, string usernameParam, string passwordParam)
         {
@@ -62,7 +64,8 @@ namespace EagleDiagnostics
             {
                 foreach (var key in regVal.Keys)
                 {
-                    LineItem curve = (LineItem)myPane.CurveList.FirstOrDefault(c => c.Label.Text == key);
+                    // Use safe nullable cast so FirstOrDefault() null results are handled without warnings
+                    LineItem? curve = myPane.CurveList.FirstOrDefault(c => c.Label.Text == key) as LineItem;
                     if (curve != null)
                     {
                         double x = new XDate(timeVec[i]);
@@ -181,20 +184,26 @@ namespace EagleDiagnostics
 
 
 
-
-
-
-
         private async Task<string> RequestWebService(string webService)
         {
             string urlRC = url + webService;
             Debug.WriteLine(urlRC);
             await Task.Delay(1000);
 
-            using (WebClient client = new WebClient())
+            // Use HttpClient with a handler that supports credentials to replace obsolete WebClient
+            var handler = new HttpClientHandler
             {
-                client.Credentials = new NetworkCredential(username, password);
-                return await client.DownloadStringTaskAsync(urlRC);
+                Credentials = new NetworkCredential(username, password)
+            };
+
+            using (var client = new HttpClient(handler, disposeHandler: true))
+            {
+                // Set a reasonable timeout
+                client.Timeout = TimeSpan.FromSeconds(30);
+
+                var response = await client.GetAsync(urlRC);
+                response.EnsureSuccessStatusCode();
+                return await response.Content.ReadAsStringAsync();
             }
         }
     }

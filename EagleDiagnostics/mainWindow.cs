@@ -4,6 +4,7 @@ namespace EagleDiagnostics
     using System;
     using System.Diagnostics;
     using System.IO;
+    using System.Reflection;
     using System.Text;
     using System.Threading.Tasks;
     using System.Windows.Forms;
@@ -819,7 +820,12 @@ namespace EagleDiagnostics
 
         private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(this.ProductVersion);
+            var version =
+                Assembly.GetExecutingAssembly()
+                        .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                        ?.InformationalVersion;
+
+            MessageBox.Show(version ?? "Unknown version");
         }
 
         private void wSSenderToolStripMenuItem_Click(object sender, EventArgs e)
