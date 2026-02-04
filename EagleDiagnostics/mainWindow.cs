@@ -19,9 +19,9 @@ namespace EagleDiagnostics
         readonly string appDataLocal = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         readonly string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         string configDirectoryPath = "";
-        private readonly List<int> configVersionList = new() { };
+        private readonly List<int> configVersionList = [];
         int subdirlevel = 0;
-        readonly List<string> languageList = new() { "CAT", "CHS", "CSY", "DEU", "ENG", "ENU", "ESN", "FRA", "ITA", "HUN", "NLD", "NOR", "PLK", "ROM", "RUS", "SKY", "TRK", "BGR", "VNM" };
+        readonly List<string> languageList = ["CAT", "CHS", "CSY", "DEU", "ENG", "ENU", "ESN", "FRA", "ITA", "HUN", "NLD", "NOR", "PLK", "ROM", "RUS", "SKY", "TRK", "BGR", "VNM"];
 
         public MainWindow()
         {
@@ -187,7 +187,7 @@ namespace EagleDiagnostics
         private void OnLoadChecks(List<string> languageList)
         {
             var MyIni = new IniFile($"{appData}\\EagleDiagnostics\\config.ini");
-            List<string> newList = new(languageList);
+            List<string> newList = [.. languageList];
             if (IniExists())
             {
                 foreach (var lang in languageList)
@@ -276,7 +276,7 @@ namespace EagleDiagnostics
 
         private void FillLangCombo(List<string> languageList)
         {
-            comboConfigLanguage.Items.AddRange(languageList.ToArray());
+            comboConfigLanguage.Items.AddRange([.. languageList]);
         }
 
 
@@ -777,7 +777,7 @@ namespace EagleDiagnostics
 
             }
             downloadLabelString = "Download Complete";
-            var destinationFolder = destinationFilePath.Remove(destinationFilePath.Length - 10);
+            var destinationFolder = destinationFilePath[..^10];
             System.IO.Compression.ZipFile.ExtractToDirectory(destinationFilePath, destinationFolder, true);
             File.Delete(destinationFilePath);
             Process.Start(destinationFolder + "\\LoxoneConfigSetup.exe");
@@ -828,13 +828,13 @@ namespace EagleDiagnostics
             MessageBox.Show(version ?? "Unknown version");
         }
 
-        private void wSSenderToolStripMenuItem_Click(object sender, EventArgs e)
+        private void WSSenderToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Form a = new WSSender();
             a.Show();
         }
 
-        private void openGitHubPageToolStripMenuItem_Click(object sender, EventArgs e)
+        private void OpenGitHubPageToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var url = "https://github.com/NeutralEagle/EagleDiagnostics";
 
@@ -845,22 +845,16 @@ namespace EagleDiagnostics
             });
         }
     }
-    public class HttpClientDownloadWithProgress : IDisposable
+    public class HttpClientDownloadWithProgress(string downloadUrl, string destinationFilePath) : IDisposable
     {
-        private readonly string _downloadUrl;
-        private readonly string _destinationFilePath;
+        private readonly string _downloadUrl = downloadUrl;
+        private readonly string _destinationFilePath = destinationFilePath;
 
         private HttpClient? _httpClient;
 
         public delegate void ProgressChangedHandler(long? totalFileSize, long totalBytesDownloaded, double? progressPercentage);
 
         public event ProgressChangedHandler? ProgressChanged;
-
-        public HttpClientDownloadWithProgress(string downloadUrl, string destinationFilePath)
-        {
-            _downloadUrl = downloadUrl;
-            _destinationFilePath = destinationFilePath;
-        }
 
         public async Task StartDownload()
         {

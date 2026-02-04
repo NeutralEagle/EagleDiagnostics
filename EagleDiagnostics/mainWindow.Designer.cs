@@ -340,7 +340,7 @@
             wSSenderToolStripMenuItem.Name = "wSSenderToolStripMenuItem";
             wSSenderToolStripMenuItem.Size = new Size(163, 22);
             wSSenderToolStripMenuItem.Text = "WSSender";
-            wSSenderToolStripMenuItem.Click += wSSenderToolStripMenuItem_Click;
+            wSSenderToolStripMenuItem.Click += WSSenderToolStripMenuItem_Click;
             // 
             // helpToolStripMenuItem
             // 
@@ -423,7 +423,7 @@
             openGitHubPageToolStripMenuItem.Name = "openGitHubPageToolStripMenuItem";
             openGitHubPageToolStripMenuItem.Size = new Size(180, 22);
             openGitHubPageToolStripMenuItem.Text = "Open GitHub page";
-            openGitHubPageToolStripMenuItem.Click += openGitHubPageToolStripMenuItem_Click;
+            openGitHubPageToolStripMenuItem.Click += OpenGitHubPageToolStripMenuItem_Click;
             // 
             // MainWindow
             // 

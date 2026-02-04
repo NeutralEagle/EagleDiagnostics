@@ -4,91 +4,137 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 
-
-
 namespace EagleDiagnostics
 {
-
-
     public partial class EagleLoxMonitor : Form
     {
         private const int Port = 7777;
-        private bool refreshFlag = true;
-        private byte[]? monitorFile;
-        private static readonly string autoSaveFolder = Directory.GetCurrentDirectory() + "\\autosave\\";
+
+        private volatile bool refreshFlag = true;
+        private volatile bool loadFlag = false;
+        private volatile bool formClosing = false;
+
+        private volatile bool UDPActive = false;
+        private UdpClient? udpClient;
+
+        private readonly string autoSaveFolder = Directory.GetCurrentDirectory() + "\\autosave\\";
         private readonly string autoSaveFile = "autosave";
         private readonly string autoSaveExtension = ".txt";
         private int autoSaveID;
-        private bool loadFlag = false;
-        private bool formClosing = false;
-        private bool UDPActive = false;
-        int pps = 0;
-        int ppsTotal = 0;
+
+        private int packetsTotal = 0;
+        private int packetsThisSecond = 0;
+
+        private static readonly byte[] LxMonStart = [0x1F, 0xFA];
+        private static readonly byte[] LxMonEnd = [0x1F, 0x1F];
+
+        // NOTE: Your regex expects embedded control markers in the log payload
         private readonly string regexPattern = @"\0\u001f.*?\0\0\u0001";
-        readonly Thread UDPthread;
-        UdpClient? udpClient = null;
+
+        private readonly Thread UDPthread;
+
+        // --- Filter helpers ---
+        private sealed record FilterTerm(string Text, bool Negated);
+
         public EagleLoxMonitor()
         {
-            //Lines = GetLines();
             InitializeComponent();
-            autoSaveTimer.Interval = 300000; //autosave every 5min
+
+            // Allow selecting multiple files to merge
+            openFileDialog1.Multiselect = true;
+
+            autoSaveTimer.Interval = 300000; // 5 min
             autoSaveTimer.Start();
+
             ppsTimer.Interval = 1000;
             ppsTimer.Start();
+
             Show();
 
             UDPthread = new Thread(UDP_setup)
             {
-                IsBackground = true
+                IsBackground = true,
+                Name = "UDP Receiver"
             };
+
             try
             {
                 UDPthread.Start();
             }
             catch (Exception ex)
-            { MessageBox.Show(ex.Message); }
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
-        /*public List<DebugLine> Lines { get; set; }
-        private List<DebugLine> GetLines()
-        {
-            var list = new List<DebugLine>();
-            list.Add(new DebugLine()
-            { 
-                header = 
-            }
-        }*/
-
+        // =========================
+        // UDP
+        // =========================
         public void UDP_setup()
         {
-            if (!UDPActive)
+            if (UDPActive) return;
+
+            try
             {
-                try
-                {
-                    udpClient = new UdpClient(Port);
-                    UDPActive = true;
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Error while opening UDP socket: \n" + ex.Message);
-                    Invoke((MethodInvoker)(() => receiveButton.Enabled = true));
-                    return;
-                }
+                udpClient = new UdpClient(Port);
+                udpClient.Client.ReceiveTimeout = 500; // allows clean shutdown
+                UDPActive = true;
             }
-            IPEndPoint iPEndPoint = new(IPAddress.Any, Port);
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error while opening UDP socket:\n" + ex.Message);
+                Invoke((MethodInvoker)(() => receiveButton.Enabled = true));
+                UDPActive = false;
+                return;
+            }
+
+            IPEndPoint endpoint = new(IPAddress.Any, Port);
 
             while (!formClosing)
             {
+                if (loadFlag)
+                {
+                    Thread.Sleep(50);
+                    continue;
+                }
+
                 try
                 {
-                    if (!loadFlag && udpClient is not null) FillData(udpClient.Receive(ref iPEndPoint), true, true);
+                    if (udpClient is null) break;
 
+                    byte[] pkt = udpClient.Receive(ref endpoint);
+                    packetsTotal++;
+                    packetsThisSecond++;
+
+                    if (TryParseMessageLine(pkt, recv: true, out string? line) && line is not null)
+                    {
+                        BeginInvoke((MethodInvoker)(() =>
+                        {
+                            mainListBox.Items.Add(line);
+                            if (refreshFlag) mainListBox.TopIndex = mainListBox.Items.Count - 1;
+                        }));
+                    }
                 }
-                catch { }
-
+                catch (SocketException se) when (se.SocketErrorCode == SocketError.TimedOut)
+                {
+                    // expected
+                }
+                catch (ObjectDisposedException)
+                {
+                    break;
+                }
+                catch
+                {
+                    // optionally log
+                }
             }
+
             UDPActive = false;
         }
+
+        // =========================
+        // KMP helpers
+        // =========================
         static int[] CalculatePrefixTable(byte[] pattern)
         {
             int[] prefixTable = new int[pattern.Length];
@@ -135,7 +181,7 @@ namespace EagleDiagnostics
 
                     if (j == pattern.Length)
                     {
-                        return i - j; // Pattern found at index i - j
+                        return i - j;
                     }
                 }
                 else
@@ -151,112 +197,368 @@ namespace EagleDiagnostics
                 }
             }
 
-            return -1; // Pattern not found
+            return -1;
         }
-        public void FillData(byte[] data, bool arr, bool recv)
+
+        // =========================
+        // Parsing: returns a ready-to-display line
+        // =========================
+        private bool TryParseMessageLine(byte[] raw, bool recv, out string? line)
         {
-            if (arr)
+            line = null;
+
+            if (raw is null || raw.Length < 30)
+                return false;
+
+            // Old NYI filters (safe)
+            if (raw.Length > 2)
             {
-                int indexOfNull;
-                int indexOfDataEnd = 0;
-
-                if (data[2] == '\xa0') return;//NYI - unknown message
-                if (data[2] == '\xa4') return;//NYI - unknown message
-                if (data[2] == '\x14') return;//NYI - unknown message
-                if (data[2] == '\x9c') return;//NYI - unknown message
-
-
-                data = data.Skip(2).Take(data.Length - 4).ToArray();
-                int dataLen = data.Length;
-                if (dataLen >= 27)
-                    if (data[24] == 0 && data[25] == 0 && data[26] == 1)
-                    {
-                        pps++;
-                        short millisec = BitConverter.ToInt16(data, 8);
-                        int time = BitConverter.ToInt32(data, 10);
-                        IPAddress address = new(data.Skip(14).Take(4).ToArray());
-                        string IP = address.ToString();
-                        byte spacer = 32;
-                        int headerEnd;
-                        headerEnd = Array.IndexOf(data, spacer, 27);
-                        byte[] pattern = { 0x00, 0x01 };
-
-
-                        if (headerEnd != -1)
-
-                        {
-                            if (!recv)
-                                indexOfDataEnd = FindPattern(data, pattern, headerEnd);
-                            else
-                                indexOfDataEnd = dataLen;
-                            if (indexOfDataEnd != -1)
-                            {
-                                string str = Encoding.UTF8.GetString(data, headerEnd + 1, (dataLen - headerEnd) - (dataLen - indexOfDataEnd) - 1);
-
-                                string header = Encoding.UTF8.GetString(data, 27, headerEnd - 26);
-                                str = Regex.Replace(str, regexPattern, "\r\n");
-                                indexOfNull = str.IndexOf("\\0\\u001f\\x001f");
-
-
-                                /*
-                            StringBuilder sb = new StringBuilder();
-                            foreach (var a in data.Take(8).ToArray())
-                            {
-                                sb.Append(a.ToString().PadLeft(3, '0') + ", ");
-
-                            }
-                            string bytes0_8 = sb.ToString();*/
-                                int messageNr = BitConverter.ToUInt16(data, 6);
-                                /*
-                                sb.Clear();
-                                foreach (var b in data.Skip(17).Take(6).ToArray())
-                                {
-                                    sb.Append(b.ToString().PadLeft(3, '0') + ", ");
-
-                                }
-                                string bytes18_23 = sb.ToString();
-                                */
-
-                                //Invoke((MethodInvoker)(() => mainListBox.Items.Add($"{bytes0_8}{messageNr.ToString().PadLeft(5, '0')}   {LoxTimeStampToDateTime(time)}.{millisec.ToString().PadLeft(3, '0')};    {IP}    {bytes18_23}        {header} {str}")));
-                                if (formClosing)
-                                    return;
-                                Invoke((MethodInvoker)(() => mainListBox.Items.Add($"{messageNr.ToString().PadLeft(6, '0')}  {LoxTimeStampToDateTime(time)}.{millisec.ToString().PadLeft(3, '0')};  {IP,-16}{header}{str}")));
-
-                                if (refreshFlag == true) Invoke((MethodInvoker)(() => mainListBox.TopIndex = mainListBox.Items.Count - 1));
-                            }
-                        }
-                    }
-
-
-
+                if (raw[2] == 0xA0) return false;
+                if (raw[2] == 0xA4) return false;
+                if (raw[2] == 0x14) return false;
+                if (raw[2] == 0x9C) return false;
             }
+
+            if (raw.Length < 6) return false;
+
+            // Trim like original
+            byte[] data = [.. raw.Skip(2).Take(raw.Length - 4)];
+            int dataLen = data.Length;
+
+            if (dataLen < 27) return false;
+
+            // Valid message gate
+            if (!(data[24] == 0 && data[25] == 0 && data[26] == 1))
+                return false;
+
+            short millisec = BitConverter.ToInt16(data, 8);
+            int time = BitConverter.ToInt32(data, 10);
+
+            IPAddress address = new([.. data.Skip(14).Take(4)]);
+            string IP = address.ToString();
+
+            byte spacer = 32;
+            int headerEnd = Array.IndexOf(data, spacer, 27);
+            if (headerEnd == -1) return false;
+
+            int indexOfDataEnd;
+            byte[] pattern = [0x00, 0x01];
+
+            if (!recv)
+                indexOfDataEnd = FindPattern(data, pattern, headerEnd);
             else
-            {
-                mainListBox.Items.Add(data);
-                var stringFile = Encoding.UTF8.GetString(data).Split("\r\n");
-            }
+                indexOfDataEnd = dataLen;
+
+            if (indexOfDataEnd == -1) return false;
+
+            string str = Encoding.UTF8.GetString(
+                data,
+                headerEnd + 1,
+                (dataLen - headerEnd) - (dataLen - indexOfDataEnd) - 1
+            );
+
+            string header = Encoding.UTF8.GetString(data, 27, headerEnd - 26);
+            str = Regex.Replace(str, regexPattern, "\r\n");
+
+            int messageNr = BitConverter.ToUInt16(data, 6);
+
+            line =
+                $"{messageNr.ToString().PadLeft(6, '0')}  {LoxTimeStampToDateTime(time)}.{millisec.ToString().PadLeft(3, '0')};  {IP,-16}{header}{str}";
+
+            return true;
         }
+
         private static DateTime LoxTimeStampToDateTime(double unixTimeStamp)
         {
-            // Unix timestamp is seconds past epoch
             DateTime dateTime = new(2009, 1, 1, 0, 0, 0, 0, DateTimeKind.Local);
             dateTime = dateTime.AddSeconds(unixTimeStamp).ToLocalTime();
             return dateTime;
         }
-        private void CheckBox1_CheckedChanged(object sender, EventArgs e)
+
+        // =========================
+        // Multi-file loading with progress
+        // =========================
+        private static long GetTotalBytes(string[] files)
         {
-            if (refreshFlag != true)
+            long total = 0;
+            foreach (var f in files)
             {
-                refreshFlag = true;
-
+                try { total += new FileInfo(f).Length; } catch { }
             }
-            else
-            {
-                refreshFlag = false;
+            return Math.Max(total, 1);
+        }
 
+        private void AddItemsBatch(List<string> items)
+        {
+            if (items.Count == 0) return;
+
+            mainListBox.BeginUpdate();
+            try
+            {
+                foreach (var s in items)
+                    mainListBox.Items.Add(s);
+            }
+            finally
+            {
+                mainListBox.EndUpdate();
             }
         }
 
+        private async void LoadButton_Click(object sender, EventArgs e)
+        {
+            openFileDialog1.Multiselect = true;
+
+            var dlg = openFileDialog1.ShowDialog();
+            if (dlg != DialogResult.OK) return;
+
+            var files = openFileDialog1.FileNames
+                .Where(File.Exists)
+                .OrderBy(f => f, StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+
+            if (files.Length == 0) return;
+
+            // Reset filter view
+            FilterButtonState(false);
+            FilterTextBox.Text = "";
+
+            // Prep UI
+            mainListBox.Items.Clear();
+
+            loadFlag = true;
+
+            // Disable inputs during load
+            loadButton.Enabled = false;
+            receiveButton.Enabled = false;
+            FilterButton.Enabled = false;
+
+            long totalBytes = GetTotalBytes(files);
+
+            // Progress bar setup (normalized 0..1000)
+            mainProgressBar.Style = ProgressBarStyle.Continuous;
+            mainProgressBar.Minimum = 0;
+            mainProgressBar.Maximum = 1000;
+            mainProgressBar.Value = 0;
+
+            var progress = new Progress<int>(p =>
+            {
+                p = Math.Clamp(p, 0, 1000);
+                mainProgressBar.Value = p;
+            });
+
+            try
+            {
+                await Task.Run(() => LoadFilesMergedWorker(files, totalBytes, progress));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                mainProgressBar.Value = 0;
+
+                loadButton.Enabled = false;
+                receiveButton.Enabled = true;
+                FilterButton.Enabled = true;
+
+                if (refreshFlag && mainListBox.Items.Count > 0)
+                    mainListBox.TopIndex = mainListBox.Items.Count - 1;
+            }
+        }
+
+        private void LoadFilesMergedWorker(string[] files, long totalBytes, IProgress<int> progress)
+        {
+            long completedBytes = 0;
+
+            const int BatchSize = 400;
+            var batch = new List<string>(BatchSize);
+
+            void Flush()
+            {
+                if (batch.Count == 0) return;
+                var copy = new List<string>(batch);
+                batch.Clear();
+                Invoke((MethodInvoker)(() => AddItemsBatch(copy)));
+            }
+
+            void ReportNormalized(long absoluteBytesDone)
+            {
+                int p = (int)Math.Clamp((absoluteBytesDone * 1000L) / totalBytes, 0, 1000);
+                progress.Report(p);
+            }
+
+            foreach (var file in files)
+            {
+                if (formClosing) return;
+
+                string ext = Path.GetExtension(file).ToLowerInvariant();
+
+                // Optional file boundary marker
+                batch.Add($"----- {Path.GetFileName(file)} -----");
+                if (batch.Count >= BatchSize) Flush();
+
+                if (ext == ".lxmon")
+                {
+                    // Read entire file (count it once), and update progress while parsing by position
+                    byte[] lx = File.ReadAllBytes(file);
+                    long fileLen = lx.LongLength;
+
+                    // Parse frames and add lines to batch (no UI work here)
+                    int i = 0;
+                    while (i < lx.Length - 1)
+                    {
+                        if (formClosing) return;
+
+                        int start = IndexOfSequence(lx, LxMonStart, i);
+                        if (start < 0) break;
+
+                        int end = IndexOfSequence(lx, LxMonEnd, start + LxMonStart.Length);
+                        if (end < 0) break;
+
+                        int frameLen = (end - start) + LxMonEnd.Length;
+                        if (frameLen <= 0) { i = start + 2; continue; }
+
+                        byte[] frame = new byte[frameLen];
+                        Buffer.BlockCopy(lx, start, frame, 0, frameLen);
+
+                        if (TryParseMessageLine(frame, recv: false, out string? line) && line is not null)
+                        {
+                            batch.Add(line);
+                            if (batch.Count >= BatchSize) Flush();
+                        }
+
+                        // Progress: completed bytes of previous files + current parse position
+                        long absolute = completedBytes + Math.Min(fileLen, (long)(start + frameLen));
+                        ReportNormalized(absolute);
+
+                        i = start + frameLen;
+                    }
+
+                    completedBytes += fileLen;
+                    ReportNormalized(completedBytes);
+                }
+                else
+                {
+                    // Text file: stream line-by-line; track progress by fs.Position
+                    using var fs = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    using var sr = new StreamReader(fs, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
+
+                    long fileLen = fs.Length;
+                    int lineCounter = 0;
+
+                    while (!sr.EndOfStream)
+                    {
+                        if (formClosing) return;
+
+                        string? line = sr.ReadLine();
+                        if (line is not null) batch.Add(line);
+
+                        if (batch.Count >= BatchSize) Flush();
+
+                        // Update progress every ~200 lines to reduce overhead
+                        lineCounter++;
+                        if (lineCounter % 200 == 0)
+                        {
+                            long absolute = completedBytes + fs.Position;
+                            ReportNormalized(absolute);
+                        }
+                    }
+
+                    completedBytes += fileLen;
+                    ReportNormalized(completedBytes);
+                }
+            }
+
+            Flush();
+            progress.Report(1000);
+        }
+
+        private static int IndexOfSequence(byte[] haystack, byte[] needle, int startIndex)
+        {
+            if (needle.Length == 0) return -1;
+            for (int i = startIndex; i <= haystack.Length - needle.Length; i++)
+            {
+                bool ok = true;
+                for (int j = 0; j < needle.Length; j++)
+                {
+                    if (haystack[i + j] != needle[j]) { ok = false; break; }
+                }
+                if (ok) return i;
+            }
+            return -1;
+        }
+
+        // =========================
+        // Receive button (switch back to UDP view)
+        // =========================
+        private void ReceiveButton_Click(object sender, EventArgs e)
+        {
+            mainListBox.Items.Clear();
+            loadFlag = false;
+            loadButton.Enabled = true;
+            receiveButton.Enabled = false;
+            FilterButtonState(false);
+            FilterButton.Enabled = false;
+        }
+
+        // =========================
+        // PPS display
+        // =========================
+        private void PpsTimer_Tick(object sender, EventArgs e)
+        {
+            ppsLabel.Text = packetsThisSecond.ToString();
+            totalPacketLabel.Text = packetsTotal.ToString();
+            packetsThisSecond = 0;
+        }
+
+        // =========================
+        // Close
+        // =========================
+        void EagleLoxMonitor_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            formClosing = true;
+
+            try { udpClient?.Close(); } catch { }
+            try { udpClient?.Dispose(); } catch { }
+        }
+
+        // =========================
+        // Autosave + Save
+        // =========================
+        private void SaveButton_Click(object sender, EventArgs e)
+        {
+            saveFileDialog1.ShowDialog();
+            string savepath = saveFileDialog1.FileName;
+            if (savepath != "")
+                File.WriteAllLines(savepath, [.. mainListBox.Items.Cast<object>().Select(x => x?.ToString() ?? "")]);
+        }
+
+        private void AutoSaveTimer_Tick(object sender, EventArgs e)
+        {
+            string savepath = autoSaveFolder + autoSaveFile + autoSaveID + autoSaveExtension;
+            if (!Directory.Exists(autoSaveFolder)) Directory.CreateDirectory(autoSaveFolder);
+
+            while (File.Exists(savepath))
+            {
+                autoSaveID++;
+                savepath = autoSaveFolder + autoSaveFile + autoSaveID + autoSaveExtension;
+            }
+
+            File.WriteAllLines(savepath, [.. mainListBox.Items.Cast<object>().Select(x => x?.ToString() ?? "")]);
+        }
+
+        // =========================
+        // Refresh checkbox
+        // =========================
+        private void CheckBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            refreshFlag = !refreshFlag;
+        }
+
+        // =========================
+        // Ctrl+A / Ctrl+C
+        // =========================
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Control && e.KeyCode == Keys.A)
@@ -285,156 +587,83 @@ namespace EagleDiagnostics
 
                 foreach (var selectedItem in mainListBox.SelectedItems)
                 {
-                    selectedItemsText += selectedItem.ToString() + Environment.NewLine;
+                    selectedItemsText += selectedItem?.ToString() + Environment.NewLine;
                 }
 
                 Clipboard.SetText(selectedItemsText);
             }
         }
 
-        private void SaveButton_Click(object sender, EventArgs e)
+        // =========================
+        // Filter: +terms, !negation, "quoted phrase"
+        // =========================
+        private static List<FilterTerm> ParseFilterQuery(string query)
         {
-            saveFileDialog1.ShowDialog();
-            string savepath = saveFileDialog1.FileName;
-            if (savepath != "") File.WriteAllLines(savepath, mainListBox.Items.Cast<string>().ToArray());
-        }
+            var terms = new List<FilterTerm>();
+            if (string.IsNullOrWhiteSpace(query))
+                return terms;
 
-        private void AutoSaveTimer_Tick(object sender, EventArgs e)
-        {
-            string savepath = autoSaveFolder + autoSaveFile + autoSaveID + autoSaveExtension;
-            if (!Directory.Exists(autoSaveFolder)) Directory.CreateDirectory(autoSaveFolder);
-            while (File.Exists(savepath))
+            // Optional ! then either "phrase" or token
+            var rx = new Regex(@"(?<neg>!)?(?:(?:""(?<q>[^""]*)"")|(?<w>\S+))",
+                RegexOptions.Compiled);
+
+            foreach (Match m in rx.Matches(query))
             {
-                autoSaveID++;
-                savepath = autoSaveFolder + autoSaveFile + autoSaveID + autoSaveExtension;
+                bool neg = m.Groups["neg"].Success;
+                string text = m.Groups["q"].Success ? m.Groups["q"].Value : m.Groups["w"].Value;
+
+                if (string.IsNullOrWhiteSpace(text))
+                    continue;
+
+                terms.Add(new FilterTerm(text, neg));
             }
-            File.WriteAllLines(savepath, mainListBox.Items.Cast<string>().ToArray());
+
+            return terms;
         }
 
-        private void LoadButton_Click(object sender, EventArgs e)
+        private static bool MatchesFilter(string haystack, List<FilterTerm> terms)
         {
-            FilterButtonState(false);
-            FilterTextBox.Text = "";
-            Invoke((MethodInvoker)(() => mainListBox.Items.Clear()));
-            loadFlag = true;
-            receiveButton.Enabled = true;
-            Invoke((MethodInvoker)(() => mainListBox.BeginUpdate()));
-            var a = openFileDialog1.ShowDialog();
-            if (a == DialogResult.OK)
-                try
-                {
+            if (terms.Count == 0)
+                return true;
 
-                    monitorFile = File.ReadAllBytes(openFileDialog1.FileName);
-
-                }
-                catch (Exception ex) { MessageBox.Show(ex.Message); }
-            if (monitorFile == null) return;
-            if (monitorFile.Length < 30) return;
-            if (monitorFile[1] < 30)
+            foreach (var t in terms)
             {
-                /*
-                byte[] buffer;
-                do
-                {
-                    buffer = monitorFile.SkipWhile(x => x != '\x1F').ToArray();
-                    monitorFile = buffer;
-                    buffer = buffer.TakeWhile(x => x != '\xF1').ToArray();
-                    FillData(buffer, true);
-                } while (buffer.Length > 26);*/
-                byte[] startBytes = { 0x1F, 0xFA };
-                byte[] endBytes = { 0x1F, 0x1F };
-                mainProgressBar.Maximum = monitorFile.Length;
-                bool insideMessage = false;
-                MemoryStream messageStream = new();
+                bool contains = haystack.Contains(t.Text, StringComparison.OrdinalIgnoreCase);
 
-                for (int i = 0; i < monitorFile.Length; i++)
-                {
-                    mainProgressBar.Value++;
-                    byte currentByte = monitorFile[i];
+                if (!t.Negated && !contains)
+                    return false;
 
-                    if (!insideMessage && currentByte == startBytes[0])
-                    {
-                        if (i + 1 < monitorFile.Length && monitorFile[i + 1] == startBytes[1])
-                        {
-                            insideMessage = true;
-                            messageStream.WriteByte(currentByte);
-                            messageStream.WriteByte(monitorFile[i + 1]);
-                            i++;
-                        }
-                    }
-                    else if (insideMessage)
-                    {
-                        messageStream.WriteByte(currentByte);
-
-                        if (currentByte == endBytes[1] && messageStream.Length >= 2)
-                        {
-                            byte[] messageBytes = messageStream.ToArray();
-                            string debugBytes = Encoding.UTF8.GetString(messageBytes);
-                            FillData(messageBytes, true, false);
-
-                            insideMessage = false;
-                            messageStream = new MemoryStream();
-                            i--;
-                        }
-                    }
-                }
-                Invoke((MethodInvoker)(() => mainListBox.EndUpdate()));
-                mainProgressBar.Value = 0;
+                if (t.Negated && contains)
+                    return false;
             }
-            else
-            {
-                FillData(monitorFile, false, false);
-            }
-        }
 
-        private void ReceiveButton_Click(object sender, EventArgs e)
-        {
-            Invoke((MethodInvoker)(() => mainListBox.Items.Clear()));
-            loadFlag = false;
-            receiveButton.Enabled = false;
-            FilterButtonState(false);
-            FilterButton.Enabled = false;
-            Thread UDPthread = new(UDP_setup);
-            try
-            {
-                UDPthread.Start();
-            }
-            catch (Exception ex)
-            { MessageBox.Show(ex.Message); }
-        }
-
-        private void PpsTimer_Tick(object sender, EventArgs e)
-        {
-            ppsTotal++;
-            ppsLabel.Text = (pps / ppsTotal).ToString();
-            totalPacketLabel.Text = pps.ToString();
-
-        }
-        void EagleLoxMonitor_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            udpClient?.Close();
-            udpClient?.Dispose();
-            formClosing = true;
+            return true;
         }
 
         private void FilterButton_Click(object sender, EventArgs e)
         {
-            if (FilterTextBox.Text != "")
+            string query = FilterTextBox.Text ?? "";
+            if (string.IsNullOrWhiteSpace(query))
             {
-
-                FilterListBox.BeginUpdate();
-                FilterButtonState(true);
-
-                foreach (var item in mainListBox.Items)
-                {
-                    if (item is not null && FilterTextBox.Text is not null && item.ToString()?.Contains(FilterTextBox.Text, StringComparison.OrdinalIgnoreCase) == true)
-                    {
-                        FilterListBox.Items.Add(item);
-                    }
-                }
-                FilterListBox.EndUpdate();
+                FilterButtonState(false);
+                return;
             }
-            else { FilterButtonState(false); }
+
+            var terms = ParseFilterQuery(query);
+
+            FilterListBox.BeginUpdate();
+            FilterButtonState(true);
+
+            foreach (var item in mainListBox.Items)
+            {
+                if (item is null) continue;
+
+                string line = item.ToString() ?? "";
+                if (MatchesFilter(line, terms))
+                    FilterListBox.Items.Add(item);
+            }
+
+            FilterListBox.EndUpdate();
         }
 
         private void FilterButtonState(bool state)
