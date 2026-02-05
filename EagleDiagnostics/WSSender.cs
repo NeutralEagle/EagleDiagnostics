@@ -101,14 +101,17 @@ namespace EagleDiagnostics
                     // Now you have the list of ShellVars, you can work with it as needed
                     panel.Controls.Clear();
                     await CreateTable(shellVars, panel, logger);
+                    NfcPlotBtn.Enabled = true;
                 }
                 else
                 {
+                    NfcPlotBtn.Enabled = false;
                     // Handle the case when no ShellVars were found
                 }
             }
             else
             {
+                NfcPlotBtn.Enabled = false;
                 // Handle the case when the redirection URL is not available
             }
         }
@@ -346,5 +349,6 @@ namespace EagleDiagnostics
             Form b = new NFCPlot($"{httpPrefix}{finalHost}", deviceSN, userTextBox.Text, pwTextBox.Text);
             b.Show();
         }
+
     }
 }

@@ -41,7 +41,7 @@
             btnSend = new Button();
             panel = new Panel();
             logger = new RichTextBox();
-            nfcPlotBtn = new Button();
+            NfcPlotBtn = new Button();
             SuspendLayout();
             // 
             // msTextBox
@@ -165,23 +165,23 @@
             logger.TabIndex = 11;
             logger.Text = "";
             // 
-            // nfcPlotBtn
+            // NfcPlotBtn
             // 
-            nfcPlotBtn.Enabled = false;
-            nfcPlotBtn.Location = new Point(597, 826);
-            nfcPlotBtn.Name = "nfcPlotBtn";
-            nfcPlotBtn.Size = new Size(75, 23);
-            nfcPlotBtn.TabIndex = 12;
-            nfcPlotBtn.Text = "NFCPlot";
-            nfcPlotBtn.UseVisualStyleBackColor = true;
-            nfcPlotBtn.Visible = false;
+            NfcPlotBtn.Enabled = false;
+            NfcPlotBtn.Location = new Point(597, 826);
+            NfcPlotBtn.Name = "NfcPlotBtn";
+            NfcPlotBtn.Size = new Size(75, 23);
+            NfcPlotBtn.TabIndex = 12;
+            NfcPlotBtn.Text = "NFCPlot";
+            NfcPlotBtn.UseVisualStyleBackColor = true;
+            NfcPlotBtn.Click += NfcPlotBtn_Click;
             // 
             // WSSender
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1384, 861);
-            Controls.Add(nfcPlotBtn);
+            Controls.Add(NfcPlotBtn);
             Controls.Add(logger);
             Controls.Add(panel);
             Controls.Add(btnSend);
@@ -216,6 +216,6 @@
         private Button btnSend;
         private Panel panel;
         private RichTextBox logger;
-        private Button nfcPlotBtn;
+        private Button NfcPlotBtn;
     }
 }

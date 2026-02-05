@@ -137,25 +137,11 @@ namespace EagleDiagnostics
             var MyIni = new IniFile($"{appData}\\EagleDiagnostics\\config.ini");
 
 
-            if (catalanToolStripMenuItem.Checked) MyIni.Write("CAT", "1", "LanguageList");
-            if (chineseToolStripMenuItem.Checked) MyIni.Write("CHS", "1", "LanguageList");
-            if (germanToolStripMenuItem.Checked) MyIni.Write("DEU", "1", "LanguageList");
-            if (czechToolStripMenuItem.Checked) MyIni.Write("CSY", "1", "LanguageList");
-            if (englishToolStripMenuItem.Checked) MyIni.Write("ENG", "1", "LanguageList");
-            if (englishUSToolStripMenuItem.Checked) MyIni.Write("ENU", "1", "LanguageList");
-            if (spanishToolStripMenuItem.Checked) MyIni.Write("ESN", "1", "LanguageList");
-            if (frenchToolStripMenuItem.Checked) MyIni.Write("FRA", "1", "LanguageList");
-            if (italianToolStripMenuItem.Checked) MyIni.Write("ITA", "1", "LanguageList");
-            if (hungarianToolStripMenuItem.Checked) MyIni.Write("HUN", "1", "LanguageList");
-            if (dutchToolStripMenuItem.Checked) MyIni.Write("NLD", "1", "LanguageList");
-            if (norwegianToolStripMenuItem.Checked) MyIni.Write("NOR", "1", "LanguageList");
-            if (polishToolStripMenuItem.Checked) MyIni.Write("PLK", "1", "LanguageList");
-            if (romanianToolStripMenuItem.Checked) MyIni.Write("ROM", "1", "LanguageList");
-            if (russianToolStripMenuItem.Checked) MyIni.Write("RUS", "1", "LanguageList");
-            if (slovakianToolStripMenuItem.Checked) MyIni.Write("SKY", "1", "LanguageList");
-            if (turkishToolStripMenuItem.Checked) MyIni.Write("TRK", "1", "LanguageList");
-            if (bulgarianToolStripMenuItem.Checked) MyIni.Write("BGR", "1", "LanguageList");
-            if (vietnameseToolStripMenuItem.Checked) MyIni.Write("VNM", "1", "LanguageList");
+            foreach (ToolStripMenuItem item in menuStrip1.Items.OfType<ToolStripMenuItem>())
+            {
+                if (item.Checked && item.Tag is string code)
+                    MyIni.Write(code, "1", "LanguageList");
+            }
 
 
             foreach (string item in comboConfigVersion.Items)
@@ -212,25 +198,15 @@ namespace EagleDiagnostics
                 else
                     comboConfigLanguage.SelectedItem = comboConfigLanguage.Items.Count - 1;
 
-                if (MyIni.Read("CAT", "LanguageList") == "1") catalanToolStripMenuItem.Checked = true;
-                if (MyIni.Read("CHS", "LanguageList") == "1") chineseToolStripMenuItem.Checked = true;
-                if (MyIni.Read("DEU", "LanguageList") == "1") germanToolStripMenuItem.Checked = true;
-                if (MyIni.Read("CSY", "LanguageList") == "1") czechToolStripMenuItem.Checked = true;
-                if (MyIni.Read("ENG", "LanguageList") == "1") englishToolStripMenuItem.Checked = true;
-                if (MyIni.Read("ENU", "LanguageList") == "1") englishUSToolStripMenuItem.Checked = true;
-                if (MyIni.Read("ENS", "LanguageList") == "1") spanishToolStripMenuItem.Checked = true;
-                if (MyIni.Read("FRA", "LanguageList") == "1") frenchToolStripMenuItem.Checked = true;
-                if (MyIni.Read("ITA", "LanguageList") == "1") italianToolStripMenuItem.Checked = true;
-                if (MyIni.Read("HUN", "LanguageList") == "1") hungarianToolStripMenuItem.Checked = true;
-                if (MyIni.Read("NLD", "LanguageList") == "1") dutchToolStripMenuItem.Checked = true;
-                if (MyIni.Read("NOR", "LanguageList") == "1") norwegianToolStripMenuItem.Checked = true;
-                if (MyIni.Read("PLK", "LanguageList") == "1") polishToolStripMenuItem.Checked = true;
-                if (MyIni.Read("ROM", "LanguageList") == "1") romanianToolStripMenuItem.Checked = true;
-                if (MyIni.Read("RUS", "LanguageList") == "1") russianToolStripMenuItem.Checked = true;
-                if (MyIni.Read("SKY", "LanguageList") == "1") slovakianToolStripMenuItem.Checked = true;
-                if (MyIni.Read("TRK", "LanguageList") == "1") turkishToolStripMenuItem.Checked = true;
-                if (MyIni.Read("BGR", "LanguageList") == "1") bulgarianToolStripMenuItem.Checked = true;
-                if (MyIni.Read("VNM", "LanguageList") == "1") vietnameseToolStripMenuItem.Checked = true;
+                foreach (ToolStripMenuItem item in languageSelectToolStripMenuItem.DropDownItems
+                                                         .OfType<ToolStripMenuItem>())
+                {
+                    if (item.Tag is string code)
+                    {
+                        item.Checked = MyIni.Read(code, "LanguageList") == "1";
+                    }
+                }
+
 
                 if (MyIni.KeyExists("DefaultVer", "Misc"))
                     comboConfigVersion.SelectedItem = MyIni.Read("DefaultVer", "Misc");
@@ -844,6 +820,7 @@ namespace EagleDiagnostics
                 UseShellExecute = true
             });
         }
+
     }
     public class HttpClientDownloadWithProgress(string downloadUrl, string destinationFilePath) : IDisposable
     {
