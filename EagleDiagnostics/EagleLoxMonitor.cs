@@ -28,7 +28,6 @@ namespace EagleDiagnostics
         private static readonly byte[] LxMonStart = [0x1F, 0xFA];
         private static readonly byte[] LxMonEnd = [0x1F, 0x1F];
 
-        // NOTE: Your regex expects embedded control markers in the log payload
         private readonly string regexPattern = @"\0\u001f.*?\0\0\u0001";
 
         private readonly Thread UDPthread;
@@ -604,8 +603,7 @@ namespace EagleDiagnostics
                 return terms;
 
             // Optional ! then either "phrase" or token
-            var rx = new Regex(@"(?<neg>!)?(?:(?:""(?<q>[^""]*)"")|(?<w>\S+))",
-                RegexOptions.Compiled);
+            var rx = MyRegex();
 
             foreach (Match m in rx.Matches(query))
             {
@@ -681,5 +679,8 @@ namespace EagleDiagnostics
                 FilterButton.FlatStyle = FlatStyle.Standard;
             }
         }
+
+        [GeneratedRegex(@"(?<neg>!)?(?:(?:""(?<q>[^""]*)"")|(?<w>\S+))", RegexOptions.Compiled)]
+        private static partial Regex MyRegex();
     }
 }

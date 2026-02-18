@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using ZedGraph;
@@ -14,253 +15,234 @@ namespace EagleDiagnostics
 {
     public partial class NFCPlot : Form
     {
-        private static readonly string[] RegKeys =
-        [
-            "System", "States", "CS", "LTA", "Settings", "Trackpad", "Generic Channel"
-        ];
-
-        private readonly Dictionary<string, List<int[]>> _regHistory = [];
-
+        [GeneratedRegex(@"value=""([^""]*)""", RegexOptions.Singleline)]
+        private static partial Regex XmlValueRegex();
         private readonly HttpClient _http;
         private readonly System.Windows.Forms.Timer _timer = new();
 
         private bool _running;
-        private int _sampleIndex;
+        private int _acceptedSampleIndex;     // sample index for X axis (accepted samples only)
+        private int _dropped;
+        private int? _fixedChannelCount;
+        private int _currentIteration;
 
         // ZedGraph series
         private readonly List<RollingPointPairList> _channelLists = [];
         private readonly List<LineItem> _channelCurves = [];
 
-        // ✅ Injected connection data
-        private readonly string _baseUrl;     // e.g. "https://dns.loxonecloud.com/504F..."
-        private readonly string _deviceName;  // your wsdevice name (Python devName), ex: "B0307126"
+        private readonly string _baseUrl;
+        private readonly string _deviceName;
         private readonly string _username;
         private readonly string _password;
 
-        // ✅ New constructor matching your call:
-        // new NFCPlot($"{httpPrefix}{finalHost}", deviceSN, user, pw)
+
+        
+
+
         public NFCPlot(string baseUrl, string deviceName, string username, string password)
         {
             InitializeComponent();
 
             _baseUrl = (baseUrl ?? "").Trim().TrimEnd('/');
-            _deviceName = deviceName ?? "";
+            txtResolvedUrl.Text = _baseUrl;
+            _deviceName = (deviceName ?? "").Trim();
+            txtDevice.Text = _deviceName;
             _username = username ?? "";
+            txtUsername.Text = _username;
             _password = password ?? "";
-
-            foreach (var k in RegKeys)
-                _regHistory[k] = [];
+            txtPassword.Text = _password;
 
             _http = new HttpClient(new HttpClientHandler
             {
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
             });
 
-            // Populate UI for visibility/debug (optional)
-            txtResolvedUrl.ReadOnly = true;
-            txtResolvedUrl.Text = _baseUrl;
-
-            txtDevice.Text = _deviceName;
-            txtUsername.Text = _username;
-            txtPassword.Text = _password;
-
-
-            // If you don't want them shown, set Visible=false in designer instead.
-
             // Defaults
-            nudIntervalMs.Value = 250;
-            nudIterations.Value = 500;
+            nudIntervalMs.Value = 1000;
             nudMaxSamples.Value = 500;
+            nudIterations.Value = 500;
 
             InitGraph();
 
             _timer.Interval = (int)nudIntervalMs.Value;
             _timer.Tick += async (_, _) => await PollOnceAsync();
         }
+
         private void InitGraph()
         {
             var pane = zedGraphControl1.GraphPane;
-            pane.Title.Text = "CS - LTA";
-            pane.XAxis.Title.Text = "Time";
-            pane.YAxis.Title.Text = "CS - LTA";
-            pane.XAxis.Type = AxisType.Date;
-            pane.XAxis.Scale.Format = "HH:mm:ss";
 
             pane.CurveList.Clear();
+            pane.Title.Text = "CS - LTA";
+            pane.XAxis.Title.Text = "Sample";
+            pane.YAxis.Title.Text = "CS - LTA";
+            pane.XAxis.Type = AxisType.Linear;
+
             _channelLists.Clear();
             _channelCurves.Clear();
+
+            _fixedChannelCount = null;
+            _acceptedSampleIndex = 0;
+            _dropped = 0;
 
             zedGraphControl1.AxisChange();
             zedGraphControl1.Invalidate();
         }
+
         private void Log(string msg)
         {
             var line = $"[{DateTime.Now:HH:mm:ss}] {msg}";
             lstLog.Items.Add(line);
             lstLog.TopIndex = lstLog.Items.Count - 1;
         }
+
         private void ApplyBasicAuth()
         {
             var token = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_username}:{_password}"));
             _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", token);
         }
 
-        private string BuildWebServiceUrl()
+        private string BuildWsUrl()
         {
-            // Python: /dev/sys/wsdevice/{devName}/IQS626ReadAllValues
-            var devEscaped = Uri.EscapeDataString(_deviceName.Trim());
+            var devEscaped = Uri.EscapeDataString(_deviceName);
             return $"{_baseUrl}/dev/sys/wsdevice/{devEscaped}/IQS626ReadAllValues";
         }
 
-        private async Task<string> RequestWSAsync()
+        private async Task<string> RequestWSRawAsync()
         {
             ApplyBasicAuth();
+            var url = BuildWsUrl();
 
-            // Probe (optional) to follow redirect like your Python r.url usage
-            // If you already pass finalHost that doesn't redirect, you can remove probe.
-            string resolvedBase = _baseUrl;
-            try
-            {
-                using var probe = await _http.GetAsync(_baseUrl);
-                if (probe.RequestMessage?.RequestUri is Uri finalUri)
-                    resolvedBase = finalUri.ToString().TrimEnd('/');
-            }
-            catch
-            {
-                // If probe fails, still try direct call based on provided baseUrl
-                resolvedBase = _baseUrl;
-            }
+            using var resp = await _http.GetAsync(url).ConfigureAwait(false);
+            var text = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-            var devEscaped = Uri.EscapeDataString(_deviceName.Trim());
-            var url = $"{resolvedBase}/dev/sys/wsdevice/{devEscaped}/IQS626ReadAllValues";
-
-            txtResolvedUrl.Text = url;
-
-            using var resp = await _http.GetAsync(url);
-            var text = await resp.Content.ReadAsStringAsync();
+            // Loxone sometimes returns HTTP 200 even for timeouts; treat payload content as truth.
             if (!resp.IsSuccessStatusCode)
                 throw new Exception($"HTTP {(int)resp.StatusCode} {resp.ReasonPhrase} - {text}");
 
             return text;
         }
 
+        // ---- Normalization (Python-equivalent behavior) ----
+
+        private static string? NormalizePayload(string raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+                return null;
+
+            var t = raw.Trim();
+
+            // Plain Reg text (fast path)
+            if (t.Contains("Reg9:", StringComparison.OrdinalIgnoreCase) &&
+                !t.Contains("<LL", StringComparison.OrdinalIgnoreCase))
+            {
+                return t;
+            }
+
+            // XML envelope: extract value="..."
+            var m = XmlValueRegex().Match(t);
+            if (!m.Success)
+                return null;
+
+            var val = m.Groups[1].Value;
+
+            if (string.Equals(val.Trim(), "timeout", StringComparison.OrdinalIgnoreCase))
+                return null;
+
+            return val;
+        }
+
+        // ---- CS/LTA parsing from Reg9 only ----
+
         private static bool TryParseHexByte(string s, out int value)
         {
+            value = 0;
+            if (s is null) return false;
+
             s = s.Trim();
+            if (s.Length == 0) return false;
+
             if (s.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
                 s = s[2..];
 
             return int.TryParse(s, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out value);
         }
 
-        private static int[] ParseRegStrToNumbers(string[] parts, int startIndex)
+        private static bool TryExtractCsLta(string payload, out int[] cs, out int[] lta)
         {
-            var nums = new List<int>();
-            for (int i = startIndex; i < parts.Length; i++)
+            cs = [];
+            lta = [];
+
+            // Python: r1 = payload.split(';')  (keep empties)
+            var r1 = payload.Split(';');
+
+            // Find segment containing Reg9:
+            string? seg = null;
+            foreach (var s in r1)
             {
-                if (TryParseHexByte(parts[i], out int v))
-                    nums.Add(v);
-            }
-            return [.. nums];
-        }
-
-        private void AppendHistory(string key, int[] row)
-        {
-            _regHistory[key].Add(row);
-
-            int max = (int)nudMaxSamples.Value;
-            if (_regHistory[key].Count > max)
-                _regHistory[key].RemoveRange(0, _regHistory[key].Count - max);
-        }
-
-        private void ParseAllValuesResponse(string text)
-        {
-            var r1 = text.Split([';'], StringSplitOptions.RemoveEmptyEntries);
-
-            for (int i = 0; i < r1.Length; i++)
-            {
-                var line = r1[i].Trim();
-                if (string.IsNullOrWhiteSpace(line))
-                    continue;
-
-                var parts = line.Split([' '], StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length < 3)
-                    continue;
-
-                try
+                if (s.Contains("Reg9:", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (i == 0)
-                    {
-                        int idx = Array.FindIndex(parts, p => p.Contains("Reg2:", StringComparison.OrdinalIgnoreCase));
-                        if (idx >= 0 && idx + 2 < parts.Length)
-                        {
-                            if (TryParseHexByte(parts[idx + 1], out int a) &&
-                                TryParseHexByte(parts[idx + 2], out int b))
-                            {
-                                AppendHistory("System", [a, b]);
-                            }
-                        }
-                    }
-                    else if (i == 1)
-                    {
-                        AppendHistory("States", ParseRegStrToNumbers(parts, 2));
-                    }
-                    else if (i == 2)
-                    {
-                        var cs = new List<int>();
-                        var lta = new List<int>();
-
-                        for (int j = 2; j + 3 < parts.Length; j += 4)
-                        {
-                            if (TryParseHexByte(parts[j], out int csLo) &&
-                                TryParseHexByte(parts[j + 1], out int csHi) &&
-                                TryParseHexByte(parts[j + 2], out int ltaLo) &&
-                                TryParseHexByte(parts[j + 3], out int ltaHi))
-                            {
-                                cs.Add((csHi << 8) | csLo);
-                                lta.Add((ltaHi << 8) | ltaLo);
-                            }
-                        }
-
-                        if (cs.Count > 0) AppendHistory("CS", [.. cs]);
-                        if (lta.Count > 0) AppendHistory("LTA", [.. lta]);
-                    }
-                    else if (i == 3)
-                    {
-                        AppendHistory("Settings", ParseRegStrToNumbers(parts, 2));
-                    }
-                    else if (i == 4)
-                    {
-                        AppendHistory("Trackpad", ParseRegStrToNumbers(parts, 2));
-                    }
-                    else if (i == 5)
-                    {
-                        AppendHistory("Generic Channel", ParseRegStrToNumbers(parts, 2));
-                    }
-                }
-                catch
-                {
-                    // Match your Python "keep going" behavior
+                    seg = s;
+                    break;
                 }
             }
+            if (seg is null)
+                return false;
+
+            // Python: r2 = seg.split(' ')  (keeps empties, including leading space token)
+            var r2 = seg.Split(' ');
+
+            // Find where "Reg9:" token is; bytes start after it
+            int regIdx = Array.FindIndex(r2, x => x.Contains("Reg9:", StringComparison.OrdinalIgnoreCase));
+            if (regIdx < 0)
+                return false;
+
+            int start = regIdx + 1;
+
+            // Need full groups of 4 bytes (CS lo/hi, LTA lo/hi)
+            int remaining = r2.Length - start;
+            if (remaining < 4 || (remaining % 4) != 0)
+                return false;
+
+            var csList = new List<int>(remaining / 4);
+            var ltaList = new List<int>(remaining / 4);
+
+            for (int j = start; j + 3 < r2.Length; j += 4)
+            {
+                if (!TryParseHexByte(r2[j], out int csLo) ||
+                    !TryParseHexByte(r2[j + 1], out int csHi) ||
+                    !TryParseHexByte(r2[j + 2], out int ltaLo) ||
+                    !TryParseHexByte(r2[j + 3], out int ltaHi))
+                {
+                    return false;
+                }
+
+                csList.Add((csHi << 8) | csLo);
+                ltaList.Add((ltaHi << 8) | ltaLo);
+            }
+
+            if (csList.Count == 0 || csList.Count != ltaList.Count)
+                return false;
+
+            cs = [.. csList];
+            lta = [.. ltaList];
+            return true;
         }
 
-        private void EnsureCurves(int channelCount)
+        // ---- Graph series management ----
+
+        private bool EnsureCurvesFixed(int channelCount)
         {
-            if (_channelCurves.Count == channelCount)
-                return;
-
-            var pane = zedGraphControl1.GraphPane;
-            pane.CurveList.Clear();
-            _channelLists.Clear();
-            _channelCurves.Clear();
-
-            int maxPts = (int)nudMaxSamples.Value;
-
-            for (int ch = 0; ch < channelCount; ch++)
+            if (_fixedChannelCount is null)
             {
-                var list = new RollingPointPairList(maxPts);
-                _channelLists.Add(list);
+                _fixedChannelCount = channelCount;
+
+                var pane = zedGraphControl1.GraphPane;
+                pane.CurveList.Clear();
+                _channelLists.Clear();
+                _channelCurves.Clear();
+
+                int maxPts = (int)nudMaxSamples.Value;
 
                 var colors = new[]
                 {
@@ -272,35 +254,48 @@ namespace EagleDiagnostics
                     System.Drawing.Color.Brown
                 };
 
-                var curve = pane.AddCurve($"Ch {ch + 1}", list, colors[ch % colors.Length], SymbolType.None);
-                _channelCurves.Add(curve);
+                for (int ch = 0; ch < channelCount; ch++)
+                {
+                    var list = new RollingPointPairList(maxPts);
+                    _channelLists.Add(list);
+                    _channelCurves.Add(pane.AddCurve($"Ch {ch + 1}", list, colors[ch % colors.Length], SymbolType.None));
+                }
+
+                zedGraphControl1.AxisChange();
+                zedGraphControl1.Invalidate();
+                return true;
             }
 
-            zedGraphControl1.AxisChange();
-            zedGraphControl1.Invalidate();
+            return channelCount == _fixedChannelCount.Value;
         }
 
-        private void PlotCsMinusLta(DateTime ts)
+        private void PlotCsMinusLta(int[] cs, int[] lta)
         {
-            var csHist = _regHistory["CS"];
-            var ltaHist = _regHistory["LTA"];
-            if (csHist.Count == 0 || ltaHist.Count == 0)
-                return;
-
-            var cs = csHist.Last();
-            var lta = ltaHist.Last();
-
             int n = Math.Min(cs.Length, lta.Length);
             if (n <= 0)
                 return;
 
-            EnsureCurves(n);
+            if (!EnsureCurvesFixed(n))
+            {
+                // don’t wipe plot; skip inconsistent sample
+                _dropped++;
+                Log($"Dropped (channel mismatch). got={n}, expected={_fixedChannelCount}, dropped={_dropped}");
+                return;
+            }
 
-            double x = new XDate(ts);
+            double x = _acceptedSampleIndex;
 
             for (int ch = 0; ch < n; ch++)
             {
+                
                 int diff = cs[ch] - lta[ch];
+                if (diff < -1000 || diff > 1000)
+                {
+                    // don’t wipe plot; skip inconsistent sample
+                    _dropped++;
+                    Log($"Dropped (diff over +-1000). diff={diff}, dropped={_dropped}");
+                    return;
+                }
                 _channelLists[ch].Add(x, diff);
             }
 
@@ -308,41 +303,60 @@ namespace EagleDiagnostics
             zedGraphControl1.Invalidate();
         }
 
+        // ---- Poll loop ----
+
         private async Task PollOnceAsync()
         {
-            if (!_running) return;
+            if (!_running)
+                return;
+            if (_currentIteration > nudIterations.Value)
+                {
+                    StopRun();
+                    Log($"Reached iteration limit ({nudIterations.Value}). Stopping.");
+                    return;
+                }
 
             _timer.Interval = (int)nudIntervalMs.Value;
 
             try
             {
-                var body = await RequestWSAsync();
-                ParseAllValuesResponse(body);
+                var raw = await RequestWSRawAsync().ConfigureAwait(true);
 
-                _sampleIndex++;
-                Log($"Reading #{_sampleIndex}");
+                var payload = NormalizePayload(raw);
+                if (payload is null)
+                {
+                    _dropped++;
+                    Log($"Dropped (timeout/no payload). dropped={_dropped}");
+                    return;
+                }
 
-                if (_sampleIndex >= 2)
-                    PlotCsMinusLta(DateTime.Now);
+                // CS/LTA only: drop entire read if we can't parse it cleanly
+                if (!TryExtractCsLta(payload, out var cs, out var lta))
+                {
+                    _dropped++;
+                    Log($"Dropped (missing/invalid CS/LTA). dropped={_dropped} payload={payload}");
+                    return;
+                }
 
-                int maxIt = (int)nudIterations.Value;
-                if (maxIt > 0 && _sampleIndex >= maxIt)
-                    StopRun();
+                // accepted sample
+                _acceptedSampleIndex++;
+                Log($"Accepted #{_acceptedSampleIndex}");
+
+                // plot (needs at least 1 sample; python starts at >=2, but not required here)
+                PlotCsMinusLta(cs, lta);
             }
             catch (Exception ex)
             {
-                Log("Failed to read: " + ex.Message);
+                _dropped++;
+                Log($"Dropped (exception): {ex.Message}");
             }
         }
 
         private void StartRun()
         {
             _running = true;
-            _sampleIndex = 0;
-
-            foreach (var k in RegKeys) _regHistory[k].Clear();
+            _currentIteration = 0;
             InitGraph();
-
             _timer.Start();
             Log("Started.");
         }
@@ -352,25 +366,6 @@ namespace EagleDiagnostics
             _running = false;
             _timer.Stop();
             Log("Stopped.");
-        }
-
-        private async void BtnReadOnce_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                var body = await RequestWSAsync();
-                ParseAllValuesResponse(body);
-
-                _sampleIndex++;
-                Log($"Single read #{_sampleIndex}");
-
-                if (_sampleIndex >= 2)
-                    PlotCsMinusLta(DateTime.Now);
-            }
-            catch (Exception ex)
-            {
-                Log("ReadOnce failed: " + ex.Message);
-            }
         }
 
         private void BtnStart_Click(object sender, EventArgs e) => StartRun();

@@ -21,7 +21,6 @@ namespace EagleDiagnostics
 
         private Button btnStart;
         private Button btnStop;
-        private Button btnReadOnce;
 
         private ListBox lstLog;
         private ZedGraphControl zedGraphControl1;
@@ -48,7 +47,6 @@ namespace EagleDiagnostics
             nudMaxSamples = new NumericUpDown();
             btnStart = new Button();
             btnStop = new Button();
-            btnReadOnce = new Button();
             lstLog = new ListBox();
             zedGraphControl1 = new ZedGraphControl();
             lblIP = new System.Windows.Forms.Label();
@@ -121,11 +119,11 @@ namespace EagleDiagnostics
             // 
             nudIntervalMs.Location = new Point(650, 8);
             nudIntervalMs.Maximum = new decimal(new int[] { 10000, 0, 0, 0 });
-            nudIntervalMs.Minimum = new decimal(new int[] { 50, 0, 0, 0 });
+            nudIntervalMs.Minimum = new decimal(new int[] { 1000, 0, 0, 0 });
             nudIntervalMs.Name = "nudIntervalMs";
             nudIntervalMs.Size = new Size(90, 23);
             nudIntervalMs.TabIndex = 16;
-            nudIntervalMs.Value = new decimal(new int[] { 250, 0, 0, 0 });
+            nudIntervalMs.Value = new decimal(new int[] { 1000, 0, 0, 0 });
             // 
             // nudIterations
             // 
@@ -163,15 +161,6 @@ namespace EagleDiagnostics
             btnStop.TabIndex = 20;
             btnStop.Text = "Stop";
             btnStop.Click += BtnStop_Click;
-            // 
-            // btnReadOnce
-            // 
-            btnReadOnce.Location = new Point(770, 68);
-            btnReadOnce.Name = "btnReadOnce";
-            btnReadOnce.Size = new Size(90, 23);
-            btnReadOnce.TabIndex = 21;
-            btnReadOnce.Text = "Read Once";
-            btnReadOnce.Click += BtnReadOnce_Click;
             // 
             // lstLog
             // 
@@ -305,7 +294,6 @@ namespace EagleDiagnostics
             Controls.Add(nudMaxSamples);
             Controls.Add(btnStart);
             Controls.Add(btnStop);
-            Controls.Add(btnReadOnce);
             Controls.Add(zedGraphControl1);
             Controls.Add(lstLog);
             Name = "NFCPlot";
