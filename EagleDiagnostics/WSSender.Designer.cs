@@ -1,6 +1,6 @@
-﻿namespace EagleDiagnostics
+﻿namespace EagleDiagnostics.WSSender
 {
-    partial class WSSender
+    partial class WSSenderForm
     {
         /// <summary>
         /// Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(WSSender));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(WSSenderForm));
             msTextBox = new TextBox();
             userTextBox = new TextBox();
             pwTextBox = new TextBox();

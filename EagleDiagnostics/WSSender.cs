@@ -4,10 +4,11 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Linq;
+using EagleDiagnostics.NFCPlot;
 
-namespace EagleDiagnostics
+namespace EagleDiagnostics.WSSender
 {
-    public partial class WSSender : Form
+    public partial class WSSenderForm : Form
     {
         // Backing fields made non-public to satisfy CA2211 (non-constant fields should not be visible)
         private static string finalHost = "";
@@ -25,9 +26,10 @@ namespace EagleDiagnostics
         public static string HttpPrefix { get => httpPrefix; set => httpPrefix = value; }
         public static string Login { get => login; set => login = value; }
 
-        readonly Dictionary<string, string> shellVarValuePairs = new();
+        readonly Dictionary<string, string> shellVarValuePairs = [];
+        private static readonly char[] separator = ['\r', '\n'];
 
-        public WSSender()
+        public WSSenderForm()
         {
             InitializeComponent();
             logger.TextChanged += Logger_TextChanged;
@@ -35,7 +37,7 @@ namespace EagleDiagnostics
 
         private static bool CheckSN(string input)
         {
-            msSN = Regex.Replace(input, "[^a-fA-F0-9]", "").ToUpper();
+            msSN = MyRegex().Replace(input, "").ToUpper();
             /*if (msSN.Length == 12 && (msSN.StartsWith("EEE000")|| msSN.StartsWith("504F94")))
             char msTypeChar = msSN[6];
             if (msTypeChar == 'A'||msTypeChar =='D') httpPrefix = "https://";
@@ -61,7 +63,7 @@ namespace EagleDiagnostics
         private async Task CheckFinalURL()
         {
             if (deviceSN == "") deviceSN = deviceTextBox.Text;
-            deviceSN = Regex.Replace(deviceSN, "[^a-zA-Z0-9]", "");
+            deviceSN = MyRegex1().Replace(deviceSN, "");
 
 
             string initialUrl = $"{httpPrefix}dns.loxonecloud.com/{msSN}";
@@ -240,7 +242,7 @@ namespace EagleDiagnostics
 
         static List<string> ParseXmlData(string xmlData)
         {
-            List<string> shellVars = new();
+            List<string> shellVars = [];
 
             // Guard against null/empty input
             if (string.IsNullOrWhiteSpace(xmlData))
@@ -260,7 +262,7 @@ namespace EagleDiagnostics
                     var valueAttr = attrs?["value"];
                     if (valueAttr != null)
                     {
-                        string[] varNames = valueAttr.Value.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                        string[] varNames = valueAttr.Value.Split(separator, StringSplitOptions.RemoveEmptyEntries);
 
                         foreach (string varName in varNames)
                         {
@@ -346,9 +348,13 @@ namespace EagleDiagnostics
         private async void NfcPlotBtn_Click(object sender, EventArgs e)
         {
             await CheckFinalURL();
-            Form b = new NFCPlot($"{httpPrefix}{finalHost}", deviceSN, userTextBox.Text, pwTextBox.Text);
+            Form b = new NFCPlotForm($"{httpPrefix}{finalHost}", deviceSN, userTextBox.Text, pwTextBox.Text);
             b.Show();
         }
 
+        [GeneratedRegex("[^a-fA-F0-9]")]
+        private static partial Regex MyRegex();
+        [GeneratedRegex("[^a-zA-Z0-9]")]
+        private static partial Regex MyRegex1();
     }
 }

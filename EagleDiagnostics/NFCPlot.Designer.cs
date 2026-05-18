@@ -1,9 +1,9 @@
 ﻿using System.Windows.Forms;
 using ZedGraph;
 
-namespace EagleDiagnostics
+namespace EagleDiagnostics.NFCPlot
 {
-    partial class NFCPlot
+    partial class NFCPlotForm
     {
         private System.ComponentModel.IContainer components = null;
 

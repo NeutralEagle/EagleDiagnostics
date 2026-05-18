@@ -39,6 +39,7 @@
             menuStrip1 = new MenuStrip();
             settingsToolStripMenuItem = new ToolStripMenuItem();
             languageSelectToolStripMenuItem = new ToolStripMenuItem();
+            bulgarianToolStripMenuItem = new ToolStripMenuItem();
             catalanToolStripMenuItem = new ToolStripMenuItem();
             chineseToolStripMenuItem = new ToolStripMenuItem();
             czechToolStripMenuItem = new ToolStripMenuItem();
@@ -52,16 +53,19 @@
             dutchToolStripMenuItem = new ToolStripMenuItem();
             norwegianToolStripMenuItem = new ToolStripMenuItem();
             polishToolStripMenuItem = new ToolStripMenuItem();
+            pTGPortugeseToolStripMenuItem = new ToolStripMenuItem();
             romanianToolStripMenuItem = new ToolStripMenuItem();
             russianToolStripMenuItem = new ToolStripMenuItem();
             slovakianToolStripMenuItem = new ToolStripMenuItem();
             turkishToolStripMenuItem = new ToolStripMenuItem();
-            bulgarianToolStripMenuItem = new ToolStripMenuItem();
+            uKRUkrainianToolStripMenuItem = new ToolStripMenuItem();
             vietnameseToolStripMenuItem = new ToolStripMenuItem();
+            tHATaiwaneseToolStripMenuItem = new ToolStripMenuItem();
             backgroundToolStripMenuItem = new ToolStripMenuItem();
             toolsToolStripMenuItem = new ToolStripMenuItem();
             eagleLoxMonitorToolStripMenuItem = new ToolStripMenuItem();
             wSSenderToolStripMenuItem = new ToolStripMenuItem();
+            deflogParserToolStripMenuItem = new ToolStripMenuItem();
             helpToolStripMenuItem = new ToolStripMenuItem();
             aboutToolStripMenuItem = new ToolStripMenuItem();
             openGitHubPageToolStripMenuItem = new ToolStripMenuItem();
@@ -156,11 +160,20 @@
             // languageSelectToolStripMenuItem
             // 
             languageSelectToolStripMenuItem.CheckOnClick = true;
-            languageSelectToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { catalanToolStripMenuItem, chineseToolStripMenuItem, czechToolStripMenuItem, germanToolStripMenuItem, englishToolStripMenuItem, englishUSToolStripMenuItem, spanishToolStripMenuItem, frenchToolStripMenuItem, italianToolStripMenuItem, hungarianToolStripMenuItem, dutchToolStripMenuItem, norwegianToolStripMenuItem, polishToolStripMenuItem, romanianToolStripMenuItem, russianToolStripMenuItem, slovakianToolStripMenuItem, turkishToolStripMenuItem, bulgarianToolStripMenuItem, vietnameseToolStripMenuItem });
+            languageSelectToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { bulgarianToolStripMenuItem, catalanToolStripMenuItem, chineseToolStripMenuItem, czechToolStripMenuItem, germanToolStripMenuItem, englishToolStripMenuItem, englishUSToolStripMenuItem, spanishToolStripMenuItem, frenchToolStripMenuItem, italianToolStripMenuItem, hungarianToolStripMenuItem, dutchToolStripMenuItem, norwegianToolStripMenuItem, polishToolStripMenuItem, pTGPortugeseToolStripMenuItem, romanianToolStripMenuItem, russianToolStripMenuItem, slovakianToolStripMenuItem, turkishToolStripMenuItem, uKRUkrainianToolStripMenuItem, vietnameseToolStripMenuItem, tHATaiwaneseToolStripMenuItem });
             languageSelectToolStripMenuItem.Name = "languageSelectToolStripMenuItem";
             languageSelectToolStripMenuItem.Size = new Size(180, 22);
             languageSelectToolStripMenuItem.Text = "Language select";
             languageSelectToolStripMenuItem.Click += LanguageSelectToolStripMenuItem_Click;
+            // 
+            // bulgarianToolStripMenuItem
+            // 
+            bulgarianToolStripMenuItem.CheckOnClick = true;
+            bulgarianToolStripMenuItem.Name = "bulgarianToolStripMenuItem";
+            bulgarianToolStripMenuItem.Size = new Size(180, 22);
+            bulgarianToolStripMenuItem.Tag = "BGR";
+            bulgarianToolStripMenuItem.Text = "BGR - Bulgarian";
+            bulgarianToolStripMenuItem.Click += BulgarianToolStripMenuItem_Click;
             // 
             // catalanToolStripMenuItem
             // 
@@ -279,6 +292,14 @@
             polishToolStripMenuItem.Text = "PLK - Polish";
             polishToolStripMenuItem.Click += PolishToolStripMenuItem_Click;
             // 
+            // pTGPortugeseToolStripMenuItem
+            // 
+            pTGPortugeseToolStripMenuItem.CheckOnClick = true;
+            pTGPortugeseToolStripMenuItem.Name = "pTGPortugeseToolStripMenuItem";
+            pTGPortugeseToolStripMenuItem.Size = new Size(180, 22);
+            pTGPortugeseToolStripMenuItem.Text = "PTG - Portugese";
+            pTGPortugeseToolStripMenuItem.Click += pTGPortugeseToolStripMenuItem_Click;
+            // 
             // romanianToolStripMenuItem
             // 
             romanianToolStripMenuItem.CheckOnClick = true;
@@ -315,14 +336,13 @@
             turkishToolStripMenuItem.Text = "TRK - Turkish";
             turkishToolStripMenuItem.Click += TurkishToolStripMenuItem_Click;
             // 
-            // bulgarianToolStripMenuItem
+            // uKRUkrainianToolStripMenuItem
             // 
-            bulgarianToolStripMenuItem.CheckOnClick = true;
-            bulgarianToolStripMenuItem.Name = "bulgarianToolStripMenuItem";
-            bulgarianToolStripMenuItem.Size = new Size(180, 22);
-            bulgarianToolStripMenuItem.Tag = "BGR";
-            bulgarianToolStripMenuItem.Text = "BGR - Bulgarian";
-            bulgarianToolStripMenuItem.Click += BulgarianToolStripMenuItem_Click;
+            uKRUkrainianToolStripMenuItem.CheckOnClick = true;
+            uKRUkrainianToolStripMenuItem.Name = "uKRUkrainianToolStripMenuItem";
+            uKRUkrainianToolStripMenuItem.Size = new Size(180, 22);
+            uKRUkrainianToolStripMenuItem.Text = "UKR - Ukrainian";
+            uKRUkrainianToolStripMenuItem.Click += uKRUkrainianToolStripMenuItem_Click;
             // 
             // vietnameseToolStripMenuItem
             // 
@@ -333,6 +353,14 @@
             vietnameseToolStripMenuItem.Text = "VNM - Vietnamese";
             vietnameseToolStripMenuItem.Click += VietnameseToolStripMenuItem_Click;
             // 
+            // tHATaiwaneseToolStripMenuItem
+            // 
+            tHATaiwaneseToolStripMenuItem.CheckOnClick = true;
+            tHATaiwaneseToolStripMenuItem.Name = "tHATaiwaneseToolStripMenuItem";
+            tHATaiwaneseToolStripMenuItem.Size = new Size(180, 22);
+            tHATaiwaneseToolStripMenuItem.Text = "THA - Taiwanese";
+            tHATaiwaneseToolStripMenuItem.Click += tHATaiwaneseToolStripMenuItem_Click;
+            // 
             // backgroundToolStripMenuItem
             // 
             backgroundToolStripMenuItem.Name = "backgroundToolStripMenuItem";
@@ -342,7 +370,7 @@
             // 
             // toolsToolStripMenuItem
             // 
-            toolsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { eagleLoxMonitorToolStripMenuItem, wSSenderToolStripMenuItem });
+            toolsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { eagleLoxMonitorToolStripMenuItem, wSSenderToolStripMenuItem, deflogParserToolStripMenuItem });
             toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             toolsToolStripMenuItem.Size = new Size(47, 20);
             toolsToolStripMenuItem.Text = "Tools";
@@ -360,6 +388,13 @@
             wSSenderToolStripMenuItem.Size = new Size(180, 22);
             wSSenderToolStripMenuItem.Text = "WSSender";
             wSSenderToolStripMenuItem.Click += WSSenderToolStripMenuItem_Click;
+            // 
+            // deflogParserToolStripMenuItem
+            // 
+            deflogParserToolStripMenuItem.Name = "deflogParserToolStripMenuItem";
+            deflogParserToolStripMenuItem.Size = new Size(180, 22);
+            deflogParserToolStripMenuItem.Text = "DeflogParser";
+            deflogParserToolStripMenuItem.Click += DeflogParserToolStripMenuItem_Click;
             // 
             // helpToolStripMenuItem
             // 
@@ -528,5 +563,9 @@
         private ToolStripMenuItem aboutToolStripMenuItem;
         private ToolStripMenuItem wSSenderToolStripMenuItem;
         private ToolStripMenuItem openGitHubPageToolStripMenuItem;
+        private ToolStripMenuItem deflogParserToolStripMenuItem;
+        private ToolStripMenuItem pTGPortugeseToolStripMenuItem;
+        private ToolStripMenuItem uKRUkrainianToolStripMenuItem;
+        private ToolStripMenuItem tHATaiwaneseToolStripMenuItem;
     }
 }

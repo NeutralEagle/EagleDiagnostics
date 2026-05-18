@@ -1,6 +1,9 @@
 namespace EagleDiagnostics
 {
+    using EagleDiagnostics.DeflogParser;
     using EagleDiagnostics.Properties;
+    using EagleDiagnostics.NFCPlot;
+    using EagleDiagnostics.WSSender;
     using System;
     using System.Diagnostics;
     using System.IO;
@@ -21,7 +24,7 @@ namespace EagleDiagnostics
         string configDirectoryPath = "";
         private readonly List<int> configVersionList = [];
         int subdirlevel = 0;
-        readonly List<string> languageList = ["CAT", "CHS", "CSY", "DEU", "ENG", "ENU", "ESN", "FRA", "ITA", "HUN", "NLD", "NOR", "PLK", "ROM", "RUS", "SKY", "TRK", "BGR", "VNM"];
+        readonly List<string> languageList = ["BGR", "CAT", "CHS", "CSY", "DEU", "ENG", "ENU", "ESN", "FRA", "ITA", "HUN", "NLD", "NOR", "PLK", "PTG", "ROM", "RUS", "SKY", "THA", "TRK", "UKR", "VNM"];
 
         public MainWindow()
         {
@@ -561,12 +564,12 @@ namespace EagleDiagnostics
 
         private void SlovakianToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (russianToolStripMenuItem.Checked && !comboConfigLanguage.Items.Contains("SKY"))
+            if (SlovakianToolStripMenuItem.Checked && !comboConfigLanguage.Items.Contains("SKY"))
             {
                 comboConfigLanguage.Items.Add("SKY");
                 comboConfigLanguage.SelectedIndex = comboConfigLanguage.Items.IndexOf("SKY");
             }
-            else if (!russianToolStripMenuItem.Checked)
+            else if (!SlovakianToolStripMenuItem.Checked)
             {
                 comboConfigLanguage.Items.Remove("SKY");
                 comboConfigLanguage.SelectedIndex = comboConfigLanguage.Items.Count - 1;
@@ -614,7 +617,47 @@ namespace EagleDiagnostics
                 comboConfigLanguage.SelectedIndex = comboConfigLanguage.Items.Count - 1;
             }
         }
+        private void pTGPortugeseToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (pTGPortugeseToolStripMenuItem.Checked && !comboConfigLanguage.Items.Contains("PTG"))
+            {
+                comboConfigLanguage.Items.Add("PTG");
+                comboConfigLanguage.SelectedIndex = comboConfigLanguage.Items.IndexOf("PTG");
+            }
+            else if (!pTGPortugeseToolStripMenuItem.Checked)
+            {
+                comboConfigLanguage.Items.Remove("PTG");
+                comboConfigLanguage.SelectedIndex = comboConfigLanguage.Items.Count - 1;
+            }
+        }
 
+        private void uKRUkrainianToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (uKRUkrainianToolStripMenuItem.Checked && !comboConfigLanguage.Items.Contains("UKR"))
+            {
+                comboConfigLanguage.Items.Add("UKR");
+                comboConfigLanguage.SelectedIndex = comboConfigLanguage.Items.IndexOf("UKR");
+            }
+            else if (!uKRUkrainianToolStripMenuItem.Checked)
+            {
+                comboConfigLanguage.Items.Remove("UKR");
+                comboConfigLanguage.SelectedIndex = comboConfigLanguage.Items.Count - 1;
+            }
+        }
+
+        private void tHATaiwaneseToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (tHATaiwaneseToolStripMenuItem.Checked && !comboConfigLanguage.Items.Contains("THA"))
+            {
+                comboConfigLanguage.Items.Add("THA");
+                comboConfigLanguage.SelectedIndex = comboConfigLanguage.Items.IndexOf("THA");
+            }
+            else if (!tHATaiwaneseToolStripMenuItem.Checked)
+            {
+                comboConfigLanguage.Items.Remove("THA");
+                comboConfigLanguage.SelectedIndex = comboConfigLanguage.Items.Count - 1;
+            }
+        }
         #endregion
 
         private async void ButtonUpdateCheck_Click(object sender, EventArgs e)
@@ -806,7 +849,7 @@ namespace EagleDiagnostics
 
         private void WSSenderToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Form a = new WSSender();
+            Form a = new WSSenderForm();
             a.Show();
         }
 
@@ -821,6 +864,13 @@ namespace EagleDiagnostics
             });
         }
 
+        private void DeflogParserToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Form a = new DeflogAnalyzerForm();
+            a.Show();
+        }
+
+        
     }
     public class HttpClientDownloadWithProgress(string downloadUrl, string destinationFilePath) : IDisposable
     {

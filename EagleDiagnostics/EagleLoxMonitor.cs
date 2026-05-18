@@ -624,18 +624,23 @@ namespace EagleDiagnostics
             if (terms.Count == 0)
                 return true;
 
-            foreach (var t in terms)
+            var positiveTerms = terms.Where(t => !t.Negated).ToList();
+            var negativeTerms = terms.Where(t => t.Negated).ToList();
+
+            // Any negated match excludes the item
+            foreach (var t in negativeTerms)
             {
-                bool contains = haystack.Contains(t.Text, StringComparison.OrdinalIgnoreCase);
-
-                if (!t.Negated && !contains)
-                    return false;
-
-                if (t.Negated && contains)
+                if (haystack.Contains(t.Text, StringComparison.OrdinalIgnoreCase))
                     return false;
             }
 
-            return true;
+            // If there are no positive terms, show anything not excluded
+            if (positiveTerms.Count == 0)
+                return true;
+
+            // At least one positive term must match
+            return positiveTerms.Any(t =>
+                haystack.Contains(t.Text, StringComparison.OrdinalIgnoreCase));
         }
 
         private void FilterButton_Click(object sender, EventArgs e)

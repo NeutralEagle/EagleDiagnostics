@@ -11,9 +11,9 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using ZedGraph;
 
-namespace EagleDiagnostics
+namespace EagleDiagnostics.NFCPlot
 {
-    public partial class NFCPlot : Form
+    public partial class NFCPlotForm : Form
     {
         [GeneratedRegex(@"value=""([^""]*)""", RegexOptions.Singleline)]
         private static partial Regex XmlValueRegex();
@@ -39,7 +39,7 @@ namespace EagleDiagnostics
         
 
 
-        public NFCPlot(string baseUrl, string deviceName, string username, string password)
+        public NFCPlotForm(string baseUrl, string deviceName, string username, string password)
         {
             InitializeComponent();
 
