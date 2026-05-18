@@ -564,12 +564,12 @@ namespace EagleDiagnostics
 
         private void SlovakianToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (SlovakianToolStripMenuItem.Checked && !comboConfigLanguage.Items.Contains("SKY"))
+            if (slovakianToolStripMenuItem.Checked && !comboConfigLanguage.Items.Contains("SKY"))
             {
                 comboConfigLanguage.Items.Add("SKY");
                 comboConfigLanguage.SelectedIndex = comboConfigLanguage.Items.IndexOf("SKY");
             }
-            else if (!SlovakianToolStripMenuItem.Checked)
+            else if (!slovakianToolStripMenuItem.Checked)
             {
                 comboConfigLanguage.Items.Remove("SKY");
                 comboConfigLanguage.SelectedIndex = comboConfigLanguage.Items.Count - 1;
@@ -617,42 +617,42 @@ namespace EagleDiagnostics
                 comboConfigLanguage.SelectedIndex = comboConfigLanguage.Items.Count - 1;
             }
         }
-        private void pTGPortugeseToolStripMenuItem_Click(object sender, EventArgs e)
+        private void PortugeseToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (pTGPortugeseToolStripMenuItem.Checked && !comboConfigLanguage.Items.Contains("PTG"))
+            if (portugeseToolStripMenuItem.Checked && !comboConfigLanguage.Items.Contains("PTG"))
             {
                 comboConfigLanguage.Items.Add("PTG");
                 comboConfigLanguage.SelectedIndex = comboConfigLanguage.Items.IndexOf("PTG");
             }
-            else if (!pTGPortugeseToolStripMenuItem.Checked)
+            else if (!portugeseToolStripMenuItem.Checked)
             {
                 comboConfigLanguage.Items.Remove("PTG");
                 comboConfigLanguage.SelectedIndex = comboConfigLanguage.Items.Count - 1;
             }
         }
 
-        private void uKRUkrainianToolStripMenuItem_Click(object sender, EventArgs e)
+        private void UkrainianToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (uKRUkrainianToolStripMenuItem.Checked && !comboConfigLanguage.Items.Contains("UKR"))
+            if (ukrainianToolStripMenuItem.Checked && !comboConfigLanguage.Items.Contains("UKR"))
             {
                 comboConfigLanguage.Items.Add("UKR");
                 comboConfigLanguage.SelectedIndex = comboConfigLanguage.Items.IndexOf("UKR");
             }
-            else if (!uKRUkrainianToolStripMenuItem.Checked)
+            else if (!ukrainianToolStripMenuItem.Checked)
             {
                 comboConfigLanguage.Items.Remove("UKR");
                 comboConfigLanguage.SelectedIndex = comboConfigLanguage.Items.Count - 1;
             }
         }
 
-        private void tHATaiwaneseToolStripMenuItem_Click(object sender, EventArgs e)
+        private void TaiwaneseToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (tHATaiwaneseToolStripMenuItem.Checked && !comboConfigLanguage.Items.Contains("THA"))
+            if (taiwaneseToolStripMenuItem.Checked && !comboConfigLanguage.Items.Contains("THA"))
             {
                 comboConfigLanguage.Items.Add("THA");
                 comboConfigLanguage.SelectedIndex = comboConfigLanguage.Items.IndexOf("THA");
             }
-            else if (!tHATaiwaneseToolStripMenuItem.Checked)
+            else if (!taiwaneseToolStripMenuItem.Checked)
             {
                 comboConfigLanguage.Items.Remove("THA");
                 comboConfigLanguage.SelectedIndex = comboConfigLanguage.Items.Count - 1;

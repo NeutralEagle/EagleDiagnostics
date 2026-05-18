@@ -182,6 +182,7 @@ namespace EagleDiagnostics.DeflogParser
             public string Key = key;
             public Severity Severity = severity;
             public string[] Patterns = patterns;
+            public string Desc = desc;
             public Regex[]? CompiledPatterns;
 
             public IssueDefinition WithCompiledRegex()
