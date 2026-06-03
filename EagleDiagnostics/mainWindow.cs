@@ -140,10 +140,11 @@ namespace EagleDiagnostics
             var MyIni = new IniFile($"{appData}\\EagleDiagnostics\\config.ini");
 
 
-            foreach (ToolStripMenuItem item in menuStrip1.Items.OfType<ToolStripMenuItem>())
+            foreach (ToolStripMenuItem item in languageSelectToolStripMenuItem.DropDownItems
+                                                     .OfType<ToolStripMenuItem>())
             {
-                if (item.Checked && item.Tag is string code)
-                    MyIni.Write(code, "1", "LanguageList");
+                if (item.Tag is string code)
+                    MyIni.Write(code, item.Checked ? "1" : "0", "LanguageList");
             }
 
 

@@ -298,6 +298,7 @@
             portugeseToolStripMenuItem.CheckOnClick = true;
             portugeseToolStripMenuItem.Name = "portugeseToolStripMenuItem";
             portugeseToolStripMenuItem.Size = new Size(173, 22);
+            portugeseToolStripMenuItem.Tag = "PTG";
             portugeseToolStripMenuItem.Text = "PTG - Portugese";
             portugeseToolStripMenuItem.Click += PortugeseToolStripMenuItem_Click;
             // 
@@ -342,6 +343,7 @@
             ukrainianToolStripMenuItem.CheckOnClick = true;
             ukrainianToolStripMenuItem.Name = "ukrainianToolStripMenuItem";
             ukrainianToolStripMenuItem.Size = new Size(173, 22);
+            ukrainianToolStripMenuItem.Tag = "UKR";
             ukrainianToolStripMenuItem.Text = "UKR - Ukrainian";
             ukrainianToolStripMenuItem.Click += UkrainianToolStripMenuItem_Click;
             // 
@@ -359,6 +361,7 @@
             taiwaneseToolStripMenuItem.CheckOnClick = true;
             taiwaneseToolStripMenuItem.Name = "taiwaneseToolStripMenuItem";
             taiwaneseToolStripMenuItem.Size = new Size(173, 22);
+            taiwaneseToolStripMenuItem.Tag = "THA";
             taiwaneseToolStripMenuItem.Text = "THA - Taiwanese";
             taiwaneseToolStripMenuItem.Click += TaiwaneseToolStripMenuItem_Click;
             // 
