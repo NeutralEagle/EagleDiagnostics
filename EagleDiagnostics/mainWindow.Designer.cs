@@ -76,6 +76,7 @@
             downloadLabel = new Label();
             timer1 = new System.Windows.Forms.Timer(components);
             backgroundPanel = new Panel();
+            checkForUpdatesToolStripMenuItem = new ToolStripMenuItem();
             menuStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -153,7 +154,7 @@
             // 
             // settingsToolStripMenuItem
             // 
-            settingsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { languageSelectToolStripMenuItem, backgroundToolStripMenuItem });
+            settingsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { languageSelectToolStripMenuItem, backgroundToolStripMenuItem, checkForUpdatesToolStripMenuItem });
             settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
             settingsToolStripMenuItem.Size = new Size(61, 20);
             settingsToolStripMenuItem.Text = "Settings";
@@ -163,7 +164,7 @@
             languageSelectToolStripMenuItem.CheckOnClick = true;
             languageSelectToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { bulgarianToolStripMenuItem, catalanToolStripMenuItem, chineseToolStripMenuItem, czechToolStripMenuItem, germanToolStripMenuItem, englishToolStripMenuItem, englishUSToolStripMenuItem, spanishToolStripMenuItem, frenchToolStripMenuItem, italianToolStripMenuItem, hungarianToolStripMenuItem, dutchToolStripMenuItem, norwegianToolStripMenuItem, polishToolStripMenuItem, portugeseToolStripMenuItem, romanianToolStripMenuItem, russianToolStripMenuItem, slovakianToolStripMenuItem, turkishToolStripMenuItem, ukrainianToolStripMenuItem, vietnameseToolStripMenuItem, taiwaneseToolStripMenuItem });
             languageSelectToolStripMenuItem.Name = "languageSelectToolStripMenuItem";
-            languageSelectToolStripMenuItem.Size = new Size(159, 22);
+            languageSelectToolStripMenuItem.Size = new Size(214, 22);
             languageSelectToolStripMenuItem.Text = "Language select";
             languageSelectToolStripMenuItem.Click += LanguageSelectToolStripMenuItem_Click;
             // 
@@ -368,7 +369,7 @@
             // backgroundToolStripMenuItem
             // 
             backgroundToolStripMenuItem.Name = "backgroundToolStripMenuItem";
-            backgroundToolStripMenuItem.Size = new Size(159, 22);
+            backgroundToolStripMenuItem.Size = new Size(214, 22);
             backgroundToolStripMenuItem.Text = "Background";
             backgroundToolStripMenuItem.Click += BackgroundToolStripMenuItem_Click;
             // 
@@ -410,14 +411,14 @@
             // aboutToolStripMenuItem
             // 
             aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            aboutToolStripMenuItem.Size = new Size(173, 22);
+            aboutToolStripMenuItem.Size = new Size(180, 22);
             aboutToolStripMenuItem.Text = "About";
             aboutToolStripMenuItem.Click += AboutToolStripMenuItem_Click;
             // 
             // openGitHubPageToolStripMenuItem
             // 
             openGitHubPageToolStripMenuItem.Name = "openGitHubPageToolStripMenuItem";
-            openGitHubPageToolStripMenuItem.Size = new Size(173, 22);
+            openGitHubPageToolStripMenuItem.Size = new Size(180, 22);
             openGitHubPageToolStripMenuItem.Text = "Open GitHub page";
             openGitHubPageToolStripMenuItem.Click += OpenGitHubPageToolStripMenuItem_Click;
             // 
@@ -482,6 +483,15 @@
             backgroundPanel.Name = "backgroundPanel";
             backgroundPanel.Size = new Size(804, 417);
             backgroundPanel.TabIndex = 11;
+            // 
+            // checkForUpdatesToolStripMenuItem
+            // 
+            checkForUpdatesToolStripMenuItem.Checked = true;
+            checkForUpdatesToolStripMenuItem.CheckOnClick = true;
+            checkForUpdatesToolStripMenuItem.CheckState = CheckState.Checked;
+            checkForUpdatesToolStripMenuItem.Name = "checkForUpdatesToolStripMenuItem";
+            checkForUpdatesToolStripMenuItem.Size = new Size(214, 22);
+            checkForUpdatesToolStripMenuItem.Text = "Check for Updates on start";
             // 
             // MainWindow
             // 
@@ -571,5 +581,6 @@
         private ToolStripMenuItem portugeseToolStripMenuItem;
         private ToolStripMenuItem ukrainianToolStripMenuItem;
         private ToolStripMenuItem taiwaneseToolStripMenuItem;
+        private ToolStripMenuItem checkForUpdatesToolStripMenuItem;
     }
 }

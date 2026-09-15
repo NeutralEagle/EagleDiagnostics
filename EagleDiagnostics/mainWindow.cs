@@ -13,6 +13,9 @@ namespace EagleDiagnostics
     using System.Windows.Forms;
     using System.Xml;
 
+
+    
+
     public partial class MainWindow : Form
     {
 
@@ -38,6 +41,64 @@ namespace EagleDiagnostics
 
 
 
+        }
+        private void OpenLatestReleasePage()
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName =
+                    "https://github.com/NeutralEagle/EagleDiagnostics/releases/latest",
+                UseShellExecute = true
+            });
+        }
+
+        private async Task CheckForApplicationUpdateAsync(bool showUpToDateMessage)
+        {
+            string? latestVersion =
+                await UpdateChecker.GetLatestVersionAsync();
+
+            // Could not check: offline, timeout, GitHub unavailable, etc.
+            if (latestVersion == null)
+            {
+                if (showUpToDateMessage)
+                {
+                    MessageBox.Show(
+                        "Could not check for updates.",
+                        "Eagle Diagnostics",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+                }
+
+                return;
+            }
+
+            if (UpdateChecker.IsNewerVersion(
+                latestVersion,
+                AppInfo.Version))
+            {
+                DialogResult result = MessageBox.Show(
+                    $"A new version of Eagle Diagnostics is available.\n\n" +
+                    $"Current version: {AppInfo.Version}\n" +
+                    $"Latest version:  {latestVersion}\n\n" +
+                    $"Open the download page?",
+                    "Update available",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Information);
+
+                if (result == DialogResult.Yes)
+                {
+                    OpenLatestReleasePage();
+                }
+            }
+            else if (showUpToDateMessage)
+            {
+                MessageBox.Show(
+                    $"Eagle Diagnostics is up to date.\n\n" +
+                    $"Version: {AppInfo.Version}",
+                    "No updates available",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+            }
         }
 
         private void ButtonConfigRescan_Click(object sender, EventArgs e)
@@ -174,7 +235,7 @@ namespace EagleDiagnostics
 
         }
 
-        private void OnLoadChecks(List<string> languageList)
+        private async void OnLoadChecks(List<string> languageList)
         {
             var MyIni = new IniFile($"{appData}\\EagleDiagnostics\\config.ini");
             List<string> newList = [.. languageList];
@@ -245,8 +306,12 @@ namespace EagleDiagnostics
             {
                 FirstStart();
             }
-
+            if (checkForUpdatesToolStripMenuItem.Checked)
+            {
+                await CheckForApplicationUpdateAsync(showUpToDateMessage: false);
+            }
         }
+
         private bool IniExists()
         {
             if (File.Exists($"{appData}\\EagleDiagnostics\\config.ini")) return true;
@@ -840,12 +905,7 @@ namespace EagleDiagnostics
 
         private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var version =
-                Assembly.GetExecutingAssembly()
-                        .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-                        ?.InformationalVersion;
-
-            MessageBox.Show(version ?? "Unknown version");
+            MessageBox.Show("EagleDiagnostics\nVersion: " + AppInfo.Version);
         }
 
         private void WSSenderToolStripMenuItem_Click(object sender, EventArgs e)
@@ -872,6 +932,14 @@ namespace EagleDiagnostics
         }
 
         
+    }
+    public static class AppInfo
+    {
+        public static string Version =>
+            Assembly.GetExecutingAssembly()
+                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                ?.InformationalVersion
+            ?? "Unknown";
     }
     public class HttpClientDownloadWithProgress(string downloadUrl, string destinationFilePath) : IDisposable
     {
@@ -943,6 +1011,9 @@ namespace EagleDiagnostics
             ProgressChanged(totalDownloadSize, totalBytesRead, progressPercentage);
         }
 
+        
+
+        
         public void Dispose()
         {
             GC.SuppressFinalize(this);
