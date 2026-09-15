@@ -728,89 +728,213 @@ namespace EagleDiagnostics
 
         private async void ButtonUpdateCheck_Click(object sender, EventArgs e)
         {
-            timer1.Start();
-            if (comboConfigVersion.Items.Count == 0)
+            buttonUpdateCheck.Enabled = false;
+            bool oneClickInstall = oneClickConfigInstallToolStripMenuItem.Checked;
+            try
             {
-                configVersionList.Clear();
+                // Take copies of UI values before entering Task.Run().
+                // WinForms controls must only be accessed from the UI thread.
+                var installedConfigs = comboConfigVersion.Items
+                    .Cast<object>()
+                    .Select(x => x.ToString()!)
+                    .ToList();
 
-            }
+                string releaseType = comboReleaseType.Text;
+                string configPath = configDirectoryPath;
 
-            errorflag = false;
-            foreach (var a in comboConfigVersion.Items)
-            {
-
-                string version = ConfigVersion($"{configDirectoryPath}\\{a}\\LoxoneConfig.exe");
-                string[] versionArr = version.Split('.');
-                int n = 0;
-                StringBuilder stringBuilder = new();
-                foreach (var b in versionArr)
-                {
-                    versionArr[n] = b.PadLeft(2, '0');
-                    stringBuilder.Append(versionArr[n]);
-                    n++;
-                }
-                configVersionList.Add(Convert.ToInt32(stringBuilder.ToString()));
-            }
-            if (errorflag) MessageBox.Show("Missing one or more Loxone Config.exe from list. Please rescan and re-run UpdateCheck");
-            int max;
-            if (configVersionList.Count > 0) max = configVersionList.Max();
-            else max = 0;
-            labelLastVersion.Text = $"Last installed version: {max}";
-            XmlNode xml = await HttpGetXMLAsync("http://update.loxone.com/updatecheck.xml");
-            int ver = 0;
-            string? downloadUrl = "";
-            if (xml is null)
-            {
-                MessageBox.Show("Updatecheck XML request returned null");
-            }
-            else
-            {
-                XmlAttributeCollection? attributes = null;
-                XmlNode? attrNode =
-                    xml.SelectSingleNode($"/Miniserversoftware/{comboReleaseType.Text}");
-                if (attrNode is null) { }
-                else
-                {
-                    attributes = attrNode.Attributes;
-                }
-
-
-                if (attributes is null)
-                {
-                    MessageBox.Show("AttributeXML is null");
-                }
-                else
-                {
-                    foreach (XmlNode x in attributes)
+                // Progress<T> posts updates back onto the WinForms UI thread.
+                IProgress<(int Current, int Total)> progress =
+                    new Progress<(int Current, int Total)>(p =>
                     {
-                        if (x.Name == "Version")
+                        downloadLabel.Text =
+                            $"Checking installed Config versions... {p.Current}/{p.Total}";
+                    });
+
+                // Scan installed Config versions on a worker thread.
+                var scanResult = await Task.Run(() =>
+                {
+                    var versions = new List<int>();
+                    bool hadError = false;
+
+                    int current = 0;
+                    int total = installedConfigs.Count;
+
+                    foreach (string config in installedConfigs)
+                    {
+                        current++;
+                        progress.Report((current, total));
+
+                        try
                         {
-                            if (x.Value is null)
-                            { }
-                            else
+                            string filePath = $"{configPath}\\{config}\\LoxoneConfig.exe";
+
+                            var versionInfo = FileVersionInfo.GetVersionInfo(filePath);
+
+                            string? version = versionInfo.FileVersion;
+
+                            if (string.IsNullOrWhiteSpace(version))
                             {
-                                string[] text = x.Value.Split('.');
-                                StringBuilder stringBuilder = new();
-                                foreach (string c in text) stringBuilder.Append(c.PadLeft(2, '0'));
-                                ver = Convert.ToInt32(stringBuilder.ToString());
+                                hadError = true;
+                                continue;
                             }
+
+                            string[] versionArr = version.Split('.');
+                            StringBuilder stringBuilder = new();
+
+                            foreach (string part in versionArr)
+                            {
+                                stringBuilder.Append(part.PadLeft(2, '0'));
+                            }
+
+                            versions.Add(Convert.ToInt32(stringBuilder.ToString()));
                         }
-                        if (x.Name == "Path")
+                        catch
                         {
-                            downloadUrl = x.Value;
+                            hadError = true;
                         }
                     }
 
-                    if (ver > max)
+                    return (
+                        Versions: versions,
+                        HadError: hadError
+                    );
+                });
+
+                configVersionList.Clear();
+                configVersionList.AddRange(scanResult.Versions);
+
+                errorflag = scanResult.HadError;
+
+                if (errorflag)
+                {
+                    MessageBox.Show("Missing one or more Loxone Config.exe from list. " + "Please rescan and re-run UpdateCheck");
+                }
+
+                int max = configVersionList.Count > 0
+                    ? configVersionList.Max()
+                    : 0;
+
+                labelLastVersion.Text =$"Last installed version: {max}";
+
+                downloadLabel.Text ="Checking for latest Config version...";
+
+                XmlNode xml;
+
+                try
+                {
+                    xml = await HttpGetXMLAsync("http://update.loxone.com/updatecheck.xml");
+                }
+                catch (Exception ex)
+                {
+                    downloadLabel.Text = "Update check failed";
+
+                    MessageBox.Show($"Updatecheck failed:\n{ex.Message}",
+                        "Updatecheck",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+
+                    return;
+                }
+
+                if (xml == null)
+                {
+                    downloadLabel.Text ="Update check failed";
+
+                    MessageBox.Show("Updatecheck XML request returned null");
+
+                    return;
+                }
+
+                int ver = 0;
+                string? downloadUrl = null;
+                string? versionString = null;
+
+                XmlNode? attrNode =
+                    xml.SelectSingleNode($"/Miniserversoftware/{releaseType}");
+
+                XmlAttributeCollection? attributes =
+                    attrNode?.Attributes;
+
+                if (attributes == null)
+                {
+                    downloadLabel.Text ="Update check failed";
+
+                    MessageBox.Show("AttributeXML is null");
+
+                    return;
+                }
+
+                foreach (XmlNode x in attributes)
+                {
+                    if (x.Name == "Version" && x.Value != null)
                     {
-                        DialogResult result = MessageBox.Show($"New {comboReleaseType.Text} version is available, press OK to download.", "New version!", MessageBoxButtons.OKCancel);
-                        if (result == DialogResult.OK && downloadUrl != null) _ = DownloadAsync(downloadUrl);
+                        versionString = x.Value;
+
+                        string[] versionParts = x.Value.Split('.');
+
+                        StringBuilder stringBuilder = new();
+
+                        foreach (string part in versionParts)
+                        {
+                            stringBuilder.Append(part.PadLeft(2, '0'));
+                        }
+
+                        ver = Convert.ToInt32(stringBuilder.ToString());
+                    }
+                    if (x.Name == "Path")
+                    {
+                        downloadUrl = x.Value;
+                    }
+                }
+
+                if (ver > max)
+                {
+                    downloadLabel.Text = "New Config version available";
+
+                    DialogResult result = MessageBox.Show(
+                        $"New {releaseType} version is available, press OK to download.",
+                        "New version!",
+                        MessageBoxButtons.OKCancel);
+
+                    if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(downloadUrl))
+                    {
+                        // Timer transfers downloadLabelString to downloadLabel.
+                        timer1.Start();
+
+                        if (!string.IsNullOrWhiteSpace(versionString))
+                        {
+                            await DownloadAsync(downloadUrl,versionString,releaseType,oneClickInstall);
+                        }
+                        RescanConfigInstallations();
                     }
                     else
-                        MessageBox.Show($"You already have the latest {comboReleaseType.Text} version or newer: Need:{ver}/Have:{max}");
+                    {
+                        downloadLabel.Text = "Download cancelled";
+                    }
+                }
+                else
+                {
+                    downloadLabel.Text = "Update check complete";
+
+                    MessageBox.Show(
+                        $"You already have the latest {releaseType} version or newer: " +
+                        $"Need:{ver}/Have:{max}");
                 }
             }
+            catch (Exception ex)
+            {
+                downloadLabel.Text = "Update check failed";
 
+                MessageBox.Show(
+                    $"Update check failed:\n{ex.Message}",
+                    "Updatecheck",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+            finally
+            {
+                buttonUpdateCheck.Enabled = true;
+            }
         }
 
         /*
@@ -829,6 +953,56 @@ namespace EagleDiagnostics
             return xmlDoc;
 
         }*/
+        private static string GetReleaseSuffix(string releaseType)
+        {
+            return releaseType.ToLowerInvariant() switch
+            {
+                "test" => "A",
+                "beta" => "B",
+                "release" => "R",
+                _ => throw new ArgumentException(
+                    $"Unknown release type: {releaseType}")
+            };
+        }
+        private static async Task InstallConfigAsync(string installerPath, string version, string releaseType, bool oneClickInstall)
+        {
+            string suffix = GetReleaseSuffix(releaseType);
+            string folderName = $"{version} {suffix}";
+            string installPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),"Loxone",folderName);
+            string startMenuName = $"Loxone Config {folderName}";
+
+            var arguments = new List<string>();
+
+            if (oneClickInstall) {
+                arguments.Add("/VERYSILENT");
+                arguments.Add("/SUPPRESSMSGBOXES");
+                arguments.Add("/NORESTART");
+            }
+                
+            arguments.Add($"/DIR=\"{installPath}\"");
+            arguments.Add($"/GROUP=\"{startMenuName}\"");
+
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = installerPath,
+                Arguments = string.Join(" ", arguments),
+                UseShellExecute = true,
+                Verb = "runas"
+            };
+
+            using Process? process = Process.Start(startInfo);
+
+            if (process == null)
+                throw new InvalidOperationException("Could not start Loxone Config installer.");
+
+            await process.WaitForExitAsync();
+
+            if (process.ExitCode != 0)
+            {
+                throw new InvalidOperationException($"Loxone Config installer exited with code {process.ExitCode}.");
+            }
+        }
+
         private static async Task<XmlNode> HttpGetXMLAsync(string url)
         {
             using HttpClient client = new();
@@ -843,29 +1017,44 @@ namespace EagleDiagnostics
             return xmlDoc;
         }
 
-        private static async Task DownloadAsync(string url)
+        private static async Task DownloadAsync(string url,string versionString,string releaseType,bool oneClickInstall)
         {
             var destinationFilePath = Path.GetFullPath("Config.zip");
 
             using (var client = new HttpClientDownloadWithProgress(url, destinationFilePath))
             {
-                client.ProgressChanged += (totalFileSize, totalBytesDownloaded, progressPercentage) =>
-                {
-                    var megaBytesDownloaded = totalBytesDownloaded / 1000000;
-                    var megaBytesSize = totalFileSize / 1000000;
+                client.ProgressChanged += (totalFileSize,totalBytesDownloaded,progressPercentage) =>
+                    {
+                        var megaBytesDownloaded = totalBytesDownloaded / 1000000;
 
-                    downloadLabelString = $"{progressPercentage}% ({megaBytesDownloaded}/{megaBytesSize}MB)";
-                };
+                        var megaBytesSize = totalFileSize / 1000000;
+
+                        downloadLabelString =
+                            $"{progressPercentage}% " +
+                            $"({megaBytesDownloaded}/{megaBytesSize}MB)";
+                    };
 
                 await client.StartDownload();
-
-
             }
-            downloadLabelString = "Download Complete";
-            var destinationFolder = destinationFilePath[..^10];
-            System.IO.Compression.ZipFile.ExtractToDirectory(destinationFilePath, destinationFolder, true);
+
+            downloadLabelString = "Extracting download...";
+
+            var destinationFolder =destinationFilePath[..^10];
+
+            // ZIP extraction is synchronous and can take a while,
+            // so keep it off the WinForms UI thread.
+            await Task.Run(() =>
+            {
+                System.IO.Compression.ZipFile
+                    .ExtractToDirectory(destinationFilePath, destinationFolder, true);
+            });
+
             File.Delete(destinationFilePath);
-            Process.Start(destinationFolder + "\\LoxoneConfigSetup.exe");
+
+            downloadLabelString = "Download Complete";
+
+            string installerPath = Path.Combine(destinationFolder,"LoxoneConfigSetup.exe");
+            await InstallConfigAsync(installerPath, versionString, releaseType, oneClickInstall);
         }
 
 

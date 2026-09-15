@@ -1,9 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
-
-namespace EagleDiagnostics
+﻿namespace EagleDiagnostics
 {
     public static class UpdateChecker
     {
