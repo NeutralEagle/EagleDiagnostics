@@ -63,6 +63,7 @@
             taiwaneseToolStripMenuItem = new ToolStripMenuItem();
             backgroundToolStripMenuItem = new ToolStripMenuItem();
             checkForUpdatesToolStripMenuItem = new ToolStripMenuItem();
+            oneClickConfigInstallToolStripMenuItem = new ToolStripMenuItem();
             toolsToolStripMenuItem = new ToolStripMenuItem();
             eagleLoxMonitorToolStripMenuItem = new ToolStripMenuItem();
             wSSenderToolStripMenuItem = new ToolStripMenuItem();
@@ -77,7 +78,6 @@
             downloadLabel = new Label();
             timer1 = new System.Windows.Forms.Timer(components);
             backgroundPanel = new Panel();
-            oneClickConfigInstallToolStripMenuItem = new ToolStripMenuItem();
             menuStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -173,7 +173,7 @@
             // 
             bulgarianToolStripMenuItem.CheckOnClick = true;
             bulgarianToolStripMenuItem.Name = "bulgarianToolStripMenuItem";
-            bulgarianToolStripMenuItem.Size = new Size(180, 22);
+            bulgarianToolStripMenuItem.Size = new Size(173, 22);
             bulgarianToolStripMenuItem.Tag = "BGR";
             bulgarianToolStripMenuItem.Text = "BGR - Bulgarian";
             bulgarianToolStripMenuItem.Click += BulgarianToolStripMenuItem_Click;
@@ -182,7 +182,7 @@
             // 
             catalanToolStripMenuItem.CheckOnClick = true;
             catalanToolStripMenuItem.Name = "catalanToolStripMenuItem";
-            catalanToolStripMenuItem.Size = new Size(180, 22);
+            catalanToolStripMenuItem.Size = new Size(173, 22);
             catalanToolStripMenuItem.Tag = "CAT";
             catalanToolStripMenuItem.Text = "CAT - Catalan";
             catalanToolStripMenuItem.Click += CatalanToolStripMenuItem_Click;
@@ -191,7 +191,7 @@
             // 
             chineseToolStripMenuItem.CheckOnClick = true;
             chineseToolStripMenuItem.Name = "chineseToolStripMenuItem";
-            chineseToolStripMenuItem.Size = new Size(180, 22);
+            chineseToolStripMenuItem.Size = new Size(173, 22);
             chineseToolStripMenuItem.Tag = "CHS";
             chineseToolStripMenuItem.Text = "CHS - Chinese";
             chineseToolStripMenuItem.Click += ChineseToolStripMenuItem_Click;
@@ -200,7 +200,7 @@
             // 
             czechToolStripMenuItem.CheckOnClick = true;
             czechToolStripMenuItem.Name = "czechToolStripMenuItem";
-            czechToolStripMenuItem.Size = new Size(180, 22);
+            czechToolStripMenuItem.Size = new Size(173, 22);
             czechToolStripMenuItem.Tag = "CSY";
             czechToolStripMenuItem.Text = "CSY - Czech";
             czechToolStripMenuItem.Click += CzechToolStripMenuItem_Click;
@@ -209,7 +209,7 @@
             // 
             germanToolStripMenuItem.CheckOnClick = true;
             germanToolStripMenuItem.Name = "germanToolStripMenuItem";
-            germanToolStripMenuItem.Size = new Size(180, 22);
+            germanToolStripMenuItem.Size = new Size(173, 22);
             germanToolStripMenuItem.Tag = "DEU";
             germanToolStripMenuItem.Text = "DEU - German";
             germanToolStripMenuItem.Click += GermanToolStripMenuItem_Click;
@@ -218,7 +218,7 @@
             // 
             englishToolStripMenuItem.CheckOnClick = true;
             englishToolStripMenuItem.Name = "englishToolStripMenuItem";
-            englishToolStripMenuItem.Size = new Size(180, 22);
+            englishToolStripMenuItem.Size = new Size(173, 22);
             englishToolStripMenuItem.Tag = "ENG";
             englishToolStripMenuItem.Text = "ENG - English (UK)";
             englishToolStripMenuItem.Click += EnglishToolStripMenuItem_Click;
@@ -227,7 +227,7 @@
             // 
             englishUSToolStripMenuItem.CheckOnClick = true;
             englishUSToolStripMenuItem.Name = "englishUSToolStripMenuItem";
-            englishUSToolStripMenuItem.Size = new Size(180, 22);
+            englishUSToolStripMenuItem.Size = new Size(173, 22);
             englishUSToolStripMenuItem.Tag = "ENU";
             englishUSToolStripMenuItem.Text = "ENU - English (US)";
             englishUSToolStripMenuItem.Click += EnglishUSToolStripMenuItem_Click;
@@ -236,7 +236,7 @@
             // 
             spanishToolStripMenuItem.CheckOnClick = true;
             spanishToolStripMenuItem.Name = "spanishToolStripMenuItem";
-            spanishToolStripMenuItem.Size = new Size(180, 22);
+            spanishToolStripMenuItem.Size = new Size(173, 22);
             spanishToolStripMenuItem.Tag = "ESN";
             spanishToolStripMenuItem.Text = "ESN - Spanish";
             spanishToolStripMenuItem.Click += SpanishToolStripMenuItem_Click;
@@ -245,7 +245,7 @@
             // 
             frenchToolStripMenuItem.CheckOnClick = true;
             frenchToolStripMenuItem.Name = "frenchToolStripMenuItem";
-            frenchToolStripMenuItem.Size = new Size(180, 22);
+            frenchToolStripMenuItem.Size = new Size(173, 22);
             frenchToolStripMenuItem.Tag = "FRA";
             frenchToolStripMenuItem.Text = "FRA - French";
             frenchToolStripMenuItem.Click += FrenchToolStripMenuItem_Click;
@@ -254,7 +254,7 @@
             // 
             italianToolStripMenuItem.CheckOnClick = true;
             italianToolStripMenuItem.Name = "italianToolStripMenuItem";
-            italianToolStripMenuItem.Size = new Size(180, 22);
+            italianToolStripMenuItem.Size = new Size(173, 22);
             italianToolStripMenuItem.Tag = "ITA";
             italianToolStripMenuItem.Text = "ITA - Italian";
             italianToolStripMenuItem.Click += ItalianToolStripMenuItem_Click;
@@ -263,7 +263,7 @@
             // 
             hungarianToolStripMenuItem.CheckOnClick = true;
             hungarianToolStripMenuItem.Name = "hungarianToolStripMenuItem";
-            hungarianToolStripMenuItem.Size = new Size(180, 22);
+            hungarianToolStripMenuItem.Size = new Size(173, 22);
             hungarianToolStripMenuItem.Tag = "HUN";
             hungarianToolStripMenuItem.Text = "HUN - Hungarian";
             hungarianToolStripMenuItem.Click += HungarianToolStripMenuItem_Click;
@@ -272,7 +272,7 @@
             // 
             dutchToolStripMenuItem.CheckOnClick = true;
             dutchToolStripMenuItem.Name = "dutchToolStripMenuItem";
-            dutchToolStripMenuItem.Size = new Size(180, 22);
+            dutchToolStripMenuItem.Size = new Size(173, 22);
             dutchToolStripMenuItem.Tag = "NLD";
             dutchToolStripMenuItem.Text = "NLD - Dutch";
             dutchToolStripMenuItem.Click += DutchToolStripMenuItem_Click;
@@ -281,7 +281,7 @@
             // 
             norwegianToolStripMenuItem.CheckOnClick = true;
             norwegianToolStripMenuItem.Name = "norwegianToolStripMenuItem";
-            norwegianToolStripMenuItem.Size = new Size(180, 22);
+            norwegianToolStripMenuItem.Size = new Size(173, 22);
             norwegianToolStripMenuItem.Tag = "NOR";
             norwegianToolStripMenuItem.Text = "NOR - Norwegian";
             norwegianToolStripMenuItem.Click += NorwegianToolStripMenuItem_Click;
@@ -290,7 +290,7 @@
             // 
             polishToolStripMenuItem.CheckOnClick = true;
             polishToolStripMenuItem.Name = "polishToolStripMenuItem";
-            polishToolStripMenuItem.Size = new Size(180, 22);
+            polishToolStripMenuItem.Size = new Size(173, 22);
             polishToolStripMenuItem.Tag = "PLK";
             polishToolStripMenuItem.Text = "PLK - Polish";
             polishToolStripMenuItem.Click += PolishToolStripMenuItem_Click;
@@ -299,7 +299,7 @@
             // 
             portugeseToolStripMenuItem.CheckOnClick = true;
             portugeseToolStripMenuItem.Name = "portugeseToolStripMenuItem";
-            portugeseToolStripMenuItem.Size = new Size(180, 22);
+            portugeseToolStripMenuItem.Size = new Size(173, 22);
             portugeseToolStripMenuItem.Tag = "PTG";
             portugeseToolStripMenuItem.Text = "PTG - Portugese";
             portugeseToolStripMenuItem.Click += PortugeseToolStripMenuItem_Click;
@@ -308,7 +308,7 @@
             // 
             romanianToolStripMenuItem.CheckOnClick = true;
             romanianToolStripMenuItem.Name = "romanianToolStripMenuItem";
-            romanianToolStripMenuItem.Size = new Size(180, 22);
+            romanianToolStripMenuItem.Size = new Size(173, 22);
             romanianToolStripMenuItem.Tag = "ROM";
             romanianToolStripMenuItem.Text = "ROM - Romanian";
             romanianToolStripMenuItem.Click += RomanianToolStripMenuItem_Click;
@@ -317,7 +317,7 @@
             // 
             russianToolStripMenuItem.CheckOnClick = true;
             russianToolStripMenuItem.Name = "russianToolStripMenuItem";
-            russianToolStripMenuItem.Size = new Size(180, 22);
+            russianToolStripMenuItem.Size = new Size(173, 22);
             russianToolStripMenuItem.Tag = "RUS";
             russianToolStripMenuItem.Text = "RUS - Russian";
             russianToolStripMenuItem.Click += RussianToolStripMenuItem_Click;
@@ -326,7 +326,7 @@
             // 
             slovakianToolStripMenuItem.CheckOnClick = true;
             slovakianToolStripMenuItem.Name = "slovakianToolStripMenuItem";
-            slovakianToolStripMenuItem.Size = new Size(180, 22);
+            slovakianToolStripMenuItem.Size = new Size(173, 22);
             slovakianToolStripMenuItem.Tag = "SKY";
             slovakianToolStripMenuItem.Text = "SKY - Slovakian";
             slovakianToolStripMenuItem.Click += SlovakianToolStripMenuItem_Click;
@@ -335,7 +335,7 @@
             // 
             turkishToolStripMenuItem.CheckOnClick = true;
             turkishToolStripMenuItem.Name = "turkishToolStripMenuItem";
-            turkishToolStripMenuItem.Size = new Size(180, 22);
+            turkishToolStripMenuItem.Size = new Size(173, 22);
             turkishToolStripMenuItem.Tag = "TRK";
             turkishToolStripMenuItem.Text = "TRK - Turkish";
             turkishToolStripMenuItem.Click += TurkishToolStripMenuItem_Click;
@@ -344,7 +344,7 @@
             // 
             ukrainianToolStripMenuItem.CheckOnClick = true;
             ukrainianToolStripMenuItem.Name = "ukrainianToolStripMenuItem";
-            ukrainianToolStripMenuItem.Size = new Size(180, 22);
+            ukrainianToolStripMenuItem.Size = new Size(173, 22);
             ukrainianToolStripMenuItem.Tag = "UKR";
             ukrainianToolStripMenuItem.Text = "UKR - Ukrainian";
             ukrainianToolStripMenuItem.Click += UkrainianToolStripMenuItem_Click;
@@ -353,7 +353,7 @@
             // 
             vietnameseToolStripMenuItem.CheckOnClick = true;
             vietnameseToolStripMenuItem.Name = "vietnameseToolStripMenuItem";
-            vietnameseToolStripMenuItem.Size = new Size(180, 22);
+            vietnameseToolStripMenuItem.Size = new Size(173, 22);
             vietnameseToolStripMenuItem.Tag = "VNM";
             vietnameseToolStripMenuItem.Text = "VNM - Vietnamese";
             vietnameseToolStripMenuItem.Click += VietnameseToolStripMenuItem_Click;
@@ -362,7 +362,7 @@
             // 
             taiwaneseToolStripMenuItem.CheckOnClick = true;
             taiwaneseToolStripMenuItem.Name = "taiwaneseToolStripMenuItem";
-            taiwaneseToolStripMenuItem.Size = new Size(180, 22);
+            taiwaneseToolStripMenuItem.Size = new Size(173, 22);
             taiwaneseToolStripMenuItem.Tag = "THA";
             taiwaneseToolStripMenuItem.Text = "THA - Taiwanese";
             taiwaneseToolStripMenuItem.Click += TaiwaneseToolStripMenuItem_Click;
@@ -382,6 +382,13 @@
             checkForUpdatesToolStripMenuItem.Name = "checkForUpdatesToolStripMenuItem";
             checkForUpdatesToolStripMenuItem.Size = new Size(214, 22);
             checkForUpdatesToolStripMenuItem.Text = "Check for Updates on start";
+            // 
+            // oneClickConfigInstallToolStripMenuItem
+            // 
+            oneClickConfigInstallToolStripMenuItem.CheckOnClick = true;
+            oneClickConfigInstallToolStripMenuItem.Name = "oneClickConfigInstallToolStripMenuItem";
+            oneClickConfigInstallToolStripMenuItem.Size = new Size(214, 22);
+            oneClickConfigInstallToolStripMenuItem.Text = "OneClick Config Install";
             // 
             // toolsToolStripMenuItem
             // 
@@ -493,13 +500,6 @@
             backgroundPanel.Name = "backgroundPanel";
             backgroundPanel.Size = new Size(804, 417);
             backgroundPanel.TabIndex = 11;
-            // 
-            // oneClickConfigInstallToolStripMenuItem
-            // 
-            oneClickConfigInstallToolStripMenuItem.CheckOnClick = true;
-            oneClickConfigInstallToolStripMenuItem.Name = "oneClickConfigInstallToolStripMenuItem";
-            oneClickConfigInstallToolStripMenuItem.Size = new Size(214, 22);
-            oneClickConfigInstallToolStripMenuItem.Text = "OneClick Config Install";
             // 
             // MainWindow
             // 

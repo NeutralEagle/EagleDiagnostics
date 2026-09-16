@@ -35,6 +35,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="Resources\LogoEagle.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="ZedGraph" Version="5.2.1" />
   </ItemGroup>
