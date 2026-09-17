@@ -84,12 +84,11 @@
 
         private static int[] ParseVersion(string version)
         {
-            return version
+            return [.. version
                 .Trim()
                 .TrimStart('v', 'V')
                 .Split('.')
-                .Select(int.Parse)
-                .ToArray();
+                .Select(int.Parse)];
         }
     }
 }

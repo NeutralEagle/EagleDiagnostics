@@ -27,6 +27,10 @@ namespace EagleDiagnostics
 
         private static readonly byte[] LxMonStart = [0x1F, 0xFA];
         private static readonly byte[] LxMonEnd = [0x1F, 0x1F];
+        // Newer Loxone Monitor exports are BinaryFormatter archives containing
+        // CCommonLogDataLine entries. Their packets are length-framed, not
+        // terminated with LxMonEnd.
+        private static readonly byte[] LengthFramedLxMonSignature = Encoding.ASCII.GetBytes("CCommonLogDataLine");
 
         private readonly string regexPattern = @"\0\u001f.*?\0\0\u0001";
 
@@ -204,24 +208,31 @@ namespace EagleDiagnostics
         // =========================
         private bool TryParseMessageLine(byte[] raw, bool recv, out string? line)
         {
-            line = null;
-
             if (raw is null || raw.Length < 30)
-                return false;
-
-            // Old NYI filters (safe)
-            if (raw.Length > 2)
             {
-                if (raw[2] == 0xA0) return false;
-                if (raw[2] == 0xA4) return false;
-                if (raw[2] == 0x14) return false;
-                if (raw[2] == 0x9C) return false;
+                line = null;
+                return false;
             }
 
-            if (raw.Length < 6) return false;
-
-            // Trim like original
+            // Legacy monitor files and received UDP packets have a two-byte
+            // prefix and a two-byte suffix around the message data.
             byte[] data = [.. raw.Skip(2).Take(raw.Length - 4)];
+            return TryParseMessageData(data, recv, out line);
+        }
+
+        private bool TryParseMessageData(byte[] data, bool recv, out string? line)
+        {
+            line = null;
+
+            // Old NYI filters (safe)
+            if (data.Length > 0)
+            {
+                if (data[0] == 0xA0) return false;
+                if (data[0] == 0xA4) return false;
+                if (data[0] == 0x14) return false;
+                if (data[0] == 0x9C) return false;
+            }
+
             int dataLen = data.Length;
 
             if (dataLen < 27) return false;
@@ -357,7 +368,7 @@ namespace EagleDiagnostics
             {
                 mainProgressBar.Value = 0;
 
-                loadButton.Enabled = false;
+                loadButton.Enabled = true;
                 receiveButton.Enabled = true;
                 FilterButton.Enabled = true;
 
@@ -402,6 +413,7 @@ namespace EagleDiagnostics
                     // Read entire file (count it once), and update progress while parsing by position
                     byte[] lx = File.ReadAllBytes(file);
                     long fileLen = lx.LongLength;
+                    bool isLengthFramedArchive = IndexOfSequence(lx, LengthFramedLxMonSignature, 0) >= 0;
 
                     // Parse frames and add lines to batch (no UI work here)
                     int i = 0;
@@ -412,26 +424,61 @@ namespace EagleDiagnostics
                         int start = IndexOfSequence(lx, LxMonStart, i);
                         if (start < 0) break;
 
-                        int end = IndexOfSequence(lx, LxMonEnd, start + LxMonStart.Length);
-                        if (end < 0) break;
+                        string? line;
+                        int nextPosition;
 
-                        int frameLen = (end - start) + LxMonEnd.Length;
-                        if (frameLen <= 0) { i = start + 2; continue; }
+                        if (isLengthFramedArchive)
+                        {
+                            // CCommonLogDataLine stores the message length as a
+                            // little-endian UInt16 immediately after 1F FA. The
+                            // message data starts at that length field and ends
+                            // at the final 00 01 marker. The declared length is
+                            // one byte longer than that data span.
+                            if (start + 4 > lx.Length)
+                            {
+                                break;
+                            }
 
-                        byte[] frame = new byte[frameLen];
-                        Buffer.BlockCopy(lx, start, frame, 0, frameLen);
+                            int declaredLength = BitConverter.ToUInt16(lx, start + LxMonStart.Length);
+                            int dataLength = declaredLength - 1;
+                            int dataStart = start + LxMonStart.Length;
 
-                        if (TryParseMessageLine(frame, recv: false, out string? line) && line is not null)
+                            if (dataLength < 27 || dataStart + dataLength > lx.Length)
+                            {
+                                i = start + LxMonStart.Length;
+                                continue;
+                            }
+
+                            byte[] data = new byte[dataLength];
+                            Buffer.BlockCopy(lx, dataStart, data, 0, dataLength);
+                            nextPosition = dataStart + dataLength;
+                            _ = TryParseMessageData(data, recv: false, out line);
+                        }
+                        else
+                        {
+                            int end = IndexOfSequence(lx, LxMonEnd, start + LxMonStart.Length);
+                            if (end < 0) break;
+
+                            int frameLen = (end - start) + LxMonEnd.Length;
+                            if (frameLen <= 0) { i = start + LxMonStart.Length; continue; }
+
+                            byte[] frame = new byte[frameLen];
+                            Buffer.BlockCopy(lx, start, frame, 0, frameLen);
+                            nextPosition = start + frameLen;
+                            _ = TryParseMessageLine(frame, recv: false, out line);
+                        }
+
+                        if (line is not null)
                         {
                             batch.Add(line);
                             if (batch.Count >= BatchSize) Flush();
                         }
 
                         // Progress: completed bytes of previous files + current parse position
-                        long absolute = completedBytes + Math.Min(fileLen, (long)(start + frameLen));
+                        long absolute = completedBytes + Math.Min(fileLen, (long)nextPosition);
                         ReportNormalized(absolute);
 
-                        i = start + frameLen;
+                        i = nextPosition;
                     }
 
                     completedBytes += fileLen;
